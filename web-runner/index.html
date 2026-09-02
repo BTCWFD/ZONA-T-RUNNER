@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZONA T RUNNER — Bogotá Electronic Runner</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            color: #fff;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlays */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 5, 10, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            transition: opacity 0.3s ease;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Titles & Branding */
+        .title-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .glitch-title {
+            font-size: 3.2rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #ff0055, 0 0 40px #00ffff;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #a0a5b5;
+            letter-spacing: 3px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* DJ Selection Cards */
+        .dj-selector-wrap {
+            display: flex;
+            gap: 16px;
+            margin: 20px 0;
+            max-width: 95vw;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        .dj-card {
+            background: #111420;
+            border: 2px solid #20263c;
+            border-radius: 12px;
+            width: 160px;
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .dj-card:hover {
+            transform: translateY(-4px);
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+        .dj-card.selected {
+            border-color: #ff0055;
+            background: #1b1626;
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.5);
+            transform: scale(1.05);
+        }
+        .dj-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            border: 2px solid #ffffff44;
+        }
+        .dj-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .dj-genre {
+            font-size: 0.75rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .dj-bpm {
+            font-size: 0.7rem;
+            color: #8890a6;
+        }
+
+        /* Buttons */
+        .btn-run {
+            background: linear-gradient(135deg, #ff0055 0%, #ff5500 100%);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.5);
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+        .btn-run:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 45px rgba(255, 0, 85, 0.8);
+        }
+        .btn-secondary {
+            background: #20263c;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #333d5e;
+        }
+
+        /* In-game HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .hud-stat {
+            background: rgba(10, 15, 30, 0.65);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border-left: 3px solid #00ffff;
+            backdrop-filter: blur(4px);
+            margin-bottom: 6px;
+        }
+        .hud-label {
+            font-size: 0.7rem;
+            color: #7b859e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .hud-value {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        /* Native in-game billboard notification */
+        #in-game-banner {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(17, 20, 32, 0.85);
+            border: 1px solid #ff0055;
+            border-radius: 10px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+        #in-game-banner:hover {
+            transform: translateX(-50%) scale(1.03);
+        }
+        .banner-tag {
+            background: #ff0055;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .banner-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Game Over Screen */
+        .gameover-box {
+            text-align: center;
+            background: #111420;
+            padding: 30px 40px;
+            border-radius: 16px;
+            border: 1px solid #ff005588;
+            box-shadow: 0 0 40px rgba(255, 0, 85, 0.3);
+        }
+        .gameover-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ff0055;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+        .promo-offer {
+            margin: 20px 0;
+            padding: 12px;
+            background: #1b1626;
+            border-radius: 8px;
+            border: 1px dashed #ff0055;
+        }
+
+        /* Controls guide */
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            color: #616a85;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main 3D Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- In-Game HUD -->
+    <div id="hud" class="hidden">
+        <div>
+            <div class="hud-stat">
+                <div class="hud-label">Puntaje</div>
+                <div id="hud-score" class="hud-value">0</div>
+            </div>
+            <div class="hud-stat" style="border-left-color: #ffcc00;">
+                <div class="hud-label">Tokens Zona T</div>
+                <div id="hud-coins" class="hud-value">0</div>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div class="hud-stat" style="border-left-color: #ff0055;">
+                <div class="hud-label">DJ Activo</div>
+                <div id="hud-dj-name" class="hud-value" style="font-size: 1.1rem; color: #ff0055;">FRESAR</div>
+            </div>
+            <div class="hud-stat" style="border-left-color: #00ff66;">
+                <div class="hud-label">Multiplicador</div>
+                <div id="hud-multiplier" class="hud-value" style="color: #00ff66;">x1</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Native Billboard Promo During Game -->
+    <div id="in-game-banner" class="hidden">
+        <span class="banner-tag">EVENTO REAL</span>
+        <span id="banner-content" class="banner-text">Club Octava — Viernes 11PM | 15% OFF Código: ZONAT</span>
+    </div>
+
+    <!-- Screen 1: Start & DJ Select -->
+    <div id="screen-start" class="overlay">
+        <div class="title-container">
+            <div class="glitch-title">ZONA T RUNNER</div>
+            <div class="subtitle">Bogotá Underground Music Platform</div>
+        </div>
+
+        <div style="font-size: 0.9rem; color: #7f8a9e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">
+            Elige tu DJ de la Escena Bogotana
+        </div>
+
+        <div class="dj-selector-wrap" id="dj-list">
+            <!-- Populated via JS with the 5 DJs -->
+        </div>
+
+        <button id="btn-start-run" class="btn-run">CORRER LA ZONA T</button>
+
+        <div class="controls-hint">
+            CONTROLES: ⬅️ / ➡️ Cambiar Carril &bull; ⬆️ / Espacio Saltar &bull; ⬇️ Deslizarse
+        </div>
+    </div>
+
+    <!-- Screen 2: Game Over -->
+    <div id="screen-gameover" class="overlay hidden">
+        <div class="gameover-box">
+            <div class="gameover-title">SET TERMINADO</div>
+            <div style="font-size: 1.1rem; margin-bottom: 10px;">
+                Distancia: <span id="final-distance" style="font-weight: bold; color: #00ffff;">0m</span>
+            </div>
+            <div style="font-size: 1.3rem; margin-bottom: 20px;">
+                Puntaje Total: <span id="final-score" style="font-weight: 900; color: #ff0055;">0</span>
+            </div>
+
+            <!-- In-game conversion / attribution reward -->
+            <div class="promo-offer">
+                <div style="font-size: 0.75rem; color: #00ffff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Recompensa por correr</div>
+                <div id="promo-offer-text" style="font-size: 0.95rem; font-weight: bold; color: #fff;">15% OFF en entradas Club X</div>
+                <div id="promo-code-text" style="font-size: 0.85rem; color: #ffcc00; margin-top: 4px;">Código: FRESAR15</div>
+            </div>
+
+            <button id="btn-restart" class="btn-run" style="padding: 12px 36px; font-size: 1.1rem;">REINICIAR SET</button>
+            <div>
+                <button id="btn-change-dj" class="btn-secondary">CAMBIAR DE DJ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js 3D Engine via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
