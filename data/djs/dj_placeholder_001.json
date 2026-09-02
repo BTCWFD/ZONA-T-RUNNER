@@ -1,0 +1,107 @@
+{
+  "id": "dj_fresar",
+  "name": "FRESAR",
+  "slug": "fresar",
+  "bio": "Residente de los clubes más oscuros de Bogotá. Su sonido techno industrial rompe las paredes de concreto de la Zona T cada viernes.",
+  "genre": "Techno Industrial",
+  "tier": "free",
+  "unlockCost": 0,
+  "sortOrder": 1,
+
+  "character": {
+    "prefab": "characters/dj_fresar",
+    "displayName": "FRESAR",
+    "avatar": "ui/avatars/avatar_fresar"
+  },
+
+  "visualIdentity": {
+    "primaryColor": "#0D0D0D",
+    "secondaryColor": "#1A1A2E",
+    "accentColor": "#E94560",
+    "particleColor": "#FF2E63",
+    "logoSprite": "ui/logos/logo_fresar"
+  },
+
+  "world": {
+    "themeId": "world_zona_t_underground",
+    "skybox": "skyboxes/sky_zona_t_night",
+    "fogColor": "#0A0A14",
+    "fogDensity": 0.035,
+    "ambientLight": "#1A0A20",
+    "weatherEffect": "smoke"
+  },
+
+  "music": {
+    "bpm": 138,
+    "mainTrack": "audio/music/placeholder/techno_138bpm",
+    "stems": {
+      "drums": "audio/music/stems/fresar_drums",
+      "bass": "audio/music/stems/fresar_bass",
+      "synth": "audio/music/stems/fresar_synth",
+      "vocals": "audio/music/stems/fresar_drop"
+    },
+    "introTrack": "audio/music/placeholder/techno_intro",
+    "intensity": 0.8
+  },
+
+  "stats": {
+    "laneSwitchSpeed": 1.15,
+    "jumpForce": 0.95,
+    "slideSpeed": 1.2,
+    "coinMultiplier": 1.0,
+    "scoreMultiplier": 1.0,
+    "specialAbility": "bass_drop"
+  },
+
+  "obstacles": {
+    "setId": "obstacle_set_industrial",
+    "uniqueObstacles": [
+      "obs_speaker_stack",
+      "obs_smoke_machine",
+      "obs_laser_grid"
+    ]
+  },
+
+  "events": [
+    {
+      "eventId": "evt_fresar_001",
+      "title": "FRESAR — Residencia Viernes",
+      "date": "2026-09-05T23:00:00-05:00",
+      "venue": "Club Underground Bogotá",
+      "url": "https://example.com/events/fresar-residencia",
+      "active": true
+    }
+  ],
+
+  "promotions": [
+    {
+      "promoId": "promo_fresar_001",
+      "title": "15% OFF Cover",
+      "code": "FRESAR15",
+      "discount": "15%",
+      "expiresAt": "2026-09-30T23:59:59-05:00",
+      "url": "https://example.com/promo/fresar15",
+      "active": true
+    }
+  ],
+
+  "socialLinks": {
+    "instagram": "https://instagram.com/fresar_dj",
+    "soundcloud": "https://soundcloud.com/fresar",
+    "spotify": "https://open.spotify.com/artist/placeholder"
+  },
+
+  "analytics": {
+    "trackingId": "dj_fresar",
+    "campaignId": "launch_2026",
+    "attributionSource": "organic"
+  },
+
+  "metadata": {
+    "version": "1.0.0",
+    "createdAt": "2026-09-02T10:00:00-05:00",
+    "updatedAt": "2026-09-02T10:00:00-05:00",
+    "createdBy": "zonat-studio",
+    "status": "draft"
+  }
+}

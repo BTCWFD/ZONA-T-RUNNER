@@ -1,0 +1,306 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zonat-runner/dj-profile",
+  "title": "ZONA T RUNNER — DJ Profile Schema",
+  "description": "Define la estructura completa de un DJ jugable. Cada DJ configura su experiencia: personaje, mundo, música, obstáculos, eventos y promociones.",
+  "type": "object",
+  "required": ["id", "name", "slug", "character", "world", "music", "stats"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^dj_[a-z0-9_]+$",
+      "description": "Identificador único del DJ. Formato: dj_nombre_estilo"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre artístico del DJ"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "URL-safe slug para deep links y analytics"
+    },
+    "bio": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Biografía corta del DJ para mostrar en la UI"
+    },
+    "genre": {
+      "type": "string",
+      "description": "Género musical principal (techno, house, minimal, etc.)"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["free", "unlockable", "premium", "event_exclusive"],
+      "default": "free",
+      "description": "Nivel de acceso del DJ"
+    },
+    "unlockCost": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Costo en monedas para desbloquear (0 = gratis)"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Orden de aparición en la pantalla de selección"
+    },
+
+    "character": {
+      "type": "object",
+      "required": ["prefab", "displayName"],
+      "properties": {
+        "prefab": {
+          "type": "string",
+          "description": "Ruta al prefab del personaje (e.g., 'characters/dj_fresar')"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Nombre mostrado durante gameplay"
+        },
+        "avatar": {
+          "type": "string",
+          "description": "Ruta al sprite de avatar para UI"
+        },
+        "animations": {
+          "type": "string",
+          "description": "Animator controller override (si difiere del base)"
+        }
+      }
+    },
+
+    "visualIdentity": {
+      "type": "object",
+      "properties": {
+        "primaryColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color primario del DJ (hex)"
+        },
+        "secondaryColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color secundario (hex)"
+        },
+        "accentColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color de acento para UI y efectos (hex)"
+        },
+        "particleColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Color de partículas y VFX"
+        },
+        "logoSprite": {
+          "type": "string",
+          "description": "Ruta al logo/marca del DJ"
+        }
+      }
+    },
+
+    "world": {
+      "type": "object",
+      "required": ["themeId"],
+      "properties": {
+        "themeId": {
+          "type": "string",
+          "pattern": "^world_[a-z0-9_]+$",
+          "description": "Referencia al tema de mundo (e.g., 'world_chapinero_neon')"
+        },
+        "skybox": {
+          "type": "string",
+          "description": "Material de skybox personalizado"
+        },
+        "fogColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "fogDensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.02
+        },
+        "ambientLight": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "weatherEffect": {
+          "type": "string",
+          "enum": ["none", "rain", "fog", "smoke", "snow"],
+          "default": "none"
+        }
+      }
+    },
+
+    "music": {
+      "type": "object",
+      "required": ["bpm", "mainTrack"],
+      "properties": {
+        "bpm": {
+          "type": "number",
+          "minimum": 60,
+          "maximum": 200,
+          "description": "Beats per minute del track principal"
+        },
+        "mainTrack": {
+          "type": "string",
+          "description": "Ruta al track principal (OGG)"
+        },
+        "stems": {
+          "type": "object",
+          "properties": {
+            "drums": { "type": "string", "description": "Stem de percusión" },
+            "bass": { "type": "string", "description": "Stem de bajo" },
+            "synth": { "type": "string", "description": "Stem de sintetizador/melodía" },
+            "vocals": { "type": "string", "description": "Stem de vocales/drops" }
+          }
+        },
+        "introTrack": {
+          "type": "string",
+          "description": "Track para pantalla de selección/preview"
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5,
+          "description": "Intensidad base de la música (afecta gameplay feel)"
+        }
+      }
+    },
+
+    "stats": {
+      "type": "object",
+      "required": ["laneSwitchSpeed", "jumpForce", "slideSpeed"],
+      "properties": {
+        "laneSwitchSpeed": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.0,
+          "default": 1.0,
+          "description": "Multiplicador de velocidad de cambio de carril"
+        },
+        "jumpForce": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.0,
+          "default": 1.0,
+          "description": "Multiplicador de fuerza de salto"
+        },
+        "slideSpeed": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2.0,
+          "default": 1.0,
+          "description": "Multiplicador de velocidad de deslizamiento"
+        },
+        "coinMultiplier": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 5.0,
+          "default": 1.0,
+          "description": "Multiplicador de monedas recolectadas"
+        },
+        "scoreMultiplier": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 5.0,
+          "default": 1.0,
+          "description": "Multiplicador de puntuación"
+        },
+        "specialAbility": {
+          "type": "string",
+          "enum": ["none", "bass_drop", "vinyl_shield", "bpm_boost", "crowd_magnet", "remix_time"],
+          "default": "none",
+          "description": "Habilidad especial del DJ"
+        }
+      }
+    },
+
+    "obstacles": {
+      "type": "object",
+      "properties": {
+        "setId": {
+          "type": "string",
+          "description": "ID del set de obstáculos temáticos del DJ"
+        },
+        "uniqueObstacles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lista de obstacle prefabs únicos de este DJ"
+        }
+      }
+    },
+
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "eventId": { "type": "string" },
+          "title": { "type": "string" },
+          "date": { "type": "string", "format": "date-time" },
+          "venue": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "active": { "type": "boolean", "default": true }
+        }
+      },
+      "description": "Eventos reales asociados al DJ"
+    },
+
+    "promotions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "promoId": { "type": "string" },
+          "title": { "type": "string" },
+          "code": { "type": "string" },
+          "discount": { "type": "string" },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "url": { "type": "string", "format": "uri" },
+          "active": { "type": "boolean", "default": true }
+        }
+      },
+      "description": "Promociones activas del DJ"
+    },
+
+    "socialLinks": {
+      "type": "object",
+      "properties": {
+        "instagram": { "type": "string", "format": "uri" },
+        "soundcloud": { "type": "string", "format": "uri" },
+        "spotify": { "type": "string", "format": "uri" },
+        "beatport": { "type": "string", "format": "uri" },
+        "website": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "analytics": {
+      "type": "object",
+      "properties": {
+        "trackingId": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "attributionSource": { "type": "string" }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "default": "1.0.0" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "review", "active", "archived"],
+          "default": "draft"
+        }
+      }
+    }
+  }
+}

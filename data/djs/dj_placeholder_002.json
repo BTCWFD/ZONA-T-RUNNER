@@ -1,0 +1,107 @@
+{
+  "id": "dj_noctua",
+  "name": "NOCTUA",
+  "slug": "noctua",
+  "bio": "Melodic techno y progressive house desde las terrazas de Chapinero. Su set es un viaje sonoro por las montañas de Bogotá al amanecer.",
+  "genre": "Melodic Techno / Progressive House",
+  "tier": "free",
+  "unlockCost": 0,
+  "sortOrder": 2,
+
+  "character": {
+    "prefab": "characters/dj_noctua",
+    "displayName": "NOCTUA",
+    "avatar": "ui/avatars/avatar_noctua"
+  },
+
+  "visualIdentity": {
+    "primaryColor": "#0B1D3A",
+    "secondaryColor": "#162447",
+    "accentColor": "#00D9FF",
+    "particleColor": "#00FFCC",
+    "logoSprite": "ui/logos/logo_noctua"
+  },
+
+  "world": {
+    "themeId": "world_chapinero_terrace",
+    "skybox": "skyboxes/sky_chapinero_dawn",
+    "fogColor": "#0D1B2A",
+    "fogDensity": 0.02,
+    "ambientLight": "#0A1628",
+    "weatherEffect": "rain"
+  },
+
+  "music": {
+    "bpm": 124,
+    "mainTrack": "audio/music/placeholder/melodic_124bpm",
+    "stems": {
+      "drums": "audio/music/stems/noctua_drums",
+      "bass": "audio/music/stems/noctua_bass",
+      "synth": "audio/music/stems/noctua_synth",
+      "vocals": "audio/music/stems/noctua_vocals"
+    },
+    "introTrack": "audio/music/placeholder/melodic_intro",
+    "intensity": 0.6
+  },
+
+  "stats": {
+    "laneSwitchSpeed": 1.0,
+    "jumpForce": 1.1,
+    "slideSpeed": 1.0,
+    "coinMultiplier": 1.2,
+    "scoreMultiplier": 1.0,
+    "specialAbility": "crowd_magnet"
+  },
+
+  "obstacles": {
+    "setId": "obstacle_set_terrace",
+    "uniqueObstacles": [
+      "obs_rooftop_vent",
+      "obs_rain_puddle",
+      "obs_neon_sign"
+    ]
+  },
+
+  "events": [
+    {
+      "eventId": "evt_noctua_001",
+      "title": "NOCTUA — Sunrise Session",
+      "date": "2026-09-12T04:00:00-05:00",
+      "venue": "Terraza Chapinero",
+      "url": "https://example.com/events/noctua-sunrise",
+      "active": true
+    }
+  ],
+
+  "promotions": [
+    {
+      "promoId": "promo_noctua_001",
+      "title": "2x1 Entradas Sunrise",
+      "code": "NOCTUA2X1",
+      "discount": "2x1",
+      "expiresAt": "2026-09-11T23:59:59-05:00",
+      "url": "https://example.com/promo/noctua2x1",
+      "active": true
+    }
+  ],
+
+  "socialLinks": {
+    "instagram": "https://instagram.com/noctua_music",
+    "soundcloud": "https://soundcloud.com/noctua",
+    "spotify": "https://open.spotify.com/artist/placeholder"
+  },
+
+  "analytics": {
+    "trackingId": "dj_noctua",
+    "campaignId": "launch_2026",
+    "attributionSource": "organic"
+  },
+
+  "metadata": {
+    "version": "1.0.0",
+    "createdAt": "2026-09-02T10:00:00-05:00",
+    "updatedAt": "2026-09-02T10:00:00-05:00",
+    "createdBy": "zonat-studio",
+    "status": "draft"
+  }
+}

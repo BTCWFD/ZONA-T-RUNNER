@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zonat-runner/world-theme",
+  "title": "ZONA T RUNNER — World Theme Schema",
+  "description": "Define un tema de mundo/nivel. Cada DJ referencia un world theme que controla la estética visual del track.",
+  "type": "object",
+  "required": ["id", "name", "trackSegments", "lighting", "palette"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^world_[a-z0-9_]+$",
+      "description": "Identificador único del mundo"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nombre del mundo para display"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descripción del mundo y su inspiración en Bogotá"
+    },
+    "bogotaInspiration": {
+      "type": "string",
+      "description": "Zona/barrio de Bogotá que inspira este mundo"
+    },
+
+    "trackSegments": {
+      "type": "object",
+      "required": ["segmentPrefabs"],
+      "properties": {
+        "segmentPrefabs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 3,
+          "description": "Lista de prefabs de segmentos de track (mínimo 3 para variedad)"
+        },
+        "segmentLength": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 100,
+          "default": 30,
+          "description": "Longitud de cada segmento en unidades"
+        },
+        "laneWidth": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 2.5,
+          "description": "Ancho de cada carril"
+        },
+        "laneCount": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 5,
+          "default": 3
+        }
+      }
+    },
+
+    "lighting": {
+      "type": "object",
+      "properties": {
+        "directionalColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "directionalIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "default": 0.3
+        },
+        "ambientColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "ambientIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "default": 0.5
+        },
+        "bloomIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5,
+          "default": 1.5,
+          "description": "Intensidad del bloom para efectos neón"
+        },
+        "neonElements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "prefab": { "type": "string" },
+              "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+              "emissionIntensity": { "type": "number" },
+              "pulseWithBeat": { "type": "boolean", "default": true }
+            }
+          },
+          "description": "Elementos neón decorativos que pulsan con la música"
+        }
+      }
+    },
+
+    "palette": {
+      "type": "object",
+      "properties": {
+        "ground": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "buildings": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "sky": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "accent1": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "accent2": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+      }
+    },
+
+    "atmosphere": {
+      "type": "object",
+      "properties": {
+        "weather": {
+          "type": "string",
+          "enum": ["none", "rain", "fog", "smoke", "drizzle"],
+          "default": "none"
+        },
+        "weatherIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "particleEffects": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Efectos de partículas ambientales (humo, lluvia, confetti, etc.)"
+        }
+      }
+    },
+
+    "nativeAds": {
+      "type": "object",
+      "properties": {
+        "billboardSlots": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3,
+          "description": "Número de posiciones de cartel/pantalla en cada segmento"
+        },
+        "screenPrefabs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Prefabs de pantallas/carteles digitales para publicidad nativa"
+        }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "default": "1.0.0" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "review", "active", "archived"],
+          "default": "draft"
+        }
+      }
+    }
+  }
+}

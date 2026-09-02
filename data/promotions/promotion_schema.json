@@ -1,0 +1,159 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "zonat-runner/promotion",
+  "title": "ZONA T RUNNER — Promotion Schema",
+  "description": "Define una promoción, evento o campaña que puede aparecer dentro del juego como publicidad nativa (carteles, pantallas digitales, elementos del mundo).",
+  "type": "object",
+  "required": ["id", "type", "title", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(promo|evt|camp)_[a-z0-9_]+$",
+      "description": "ID único. Prefijo indica tipo: promo_, evt_, camp_"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["event", "discount", "release", "residency", "campaign", "brand"],
+      "description": "Tipo de promoción"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Título corto para mostrar en carteles in-game"
+    },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Subtítulo o descripción breve"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "scheduled", "active", "expired", "archived"],
+      "default": "draft"
+    },
+
+    "display": {
+      "type": "object",
+      "properties": {
+        "bannerText": {
+          "type": "string",
+          "maxLength": 30,
+          "description": "Texto del cartel in-game (e.g., 'TONIGHT', '15% OFF', 'NEW RELEASE')"
+        },
+        "bannerColor": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "imageSprite": {
+          "type": "string",
+          "description": "Sprite/textura para pantalla digital in-game"
+        },
+        "placement": {
+          "type": "string",
+          "enum": ["billboard", "screen", "poster", "floor_decal", "floating"],
+          "default": "billboard"
+        }
+      }
+    },
+
+    "targeting": {
+      "type": "object",
+      "properties": {
+        "djIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Solo aparece en mundos de estos DJs (vacío = todos)"
+        },
+        "worldIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Solo aparece en estos mundos"
+        },
+        "minScore": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Score mínimo del jugador para ver esta promo"
+        }
+      }
+    },
+
+    "action": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string",
+          "enum": ["none", "open_url", "apply_code", "show_details", "unlock_content"],
+          "default": "none"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL externa (venta de entradas, sitio del evento, etc.)"
+        },
+        "promoCode": {
+          "type": "string",
+          "description": "Código promocional asociado (e.g., 'ZONAT15')"
+        },
+        "discount": {
+          "type": "string",
+          "description": "Descripción del descuento (e.g., '15% OFF', '2x1', 'FREE DRINK')"
+        }
+      }
+    },
+
+    "schedule": {
+      "type": "object",
+      "properties": {
+        "startsAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endsAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "eventDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Fecha del evento real (si aplica)"
+        },
+        "venue": {
+          "type": "string",
+          "description": "Nombre del club/venue"
+        }
+      }
+    },
+
+    "attribution": {
+      "type": "object",
+      "properties": {
+        "djId": { "type": "string" },
+        "clubId": { "type": "string" },
+        "brandId": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "referralCode": { "type": "string" }
+      },
+      "description": "Datos de atribución para tracking de conversiones"
+    },
+
+    "analytics": {
+      "type": "object",
+      "properties": {
+        "impressionEvent": { "type": "string", "default": "promo_impression" },
+        "clickEvent": { "type": "string", "default": "promo_click" },
+        "conversionEvent": { "type": "string", "default": "promo_conversion" }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "default": "1.0.0" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      }
+    }
+  }
+}
