@@ -33,6 +33,7 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+*.crdownload
 
 # ---- Unity Asset Meta ----
 *.pidb.meta
