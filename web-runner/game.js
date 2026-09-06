@@ -100,6 +100,25 @@ const DJS = [
             discount: "Pase VIP con 25% descuento",
             venue: "Chamorro City Hall - Autonorte"
         }
+    },
+    {
+        id: "dj_zara",
+        name: "ZARA",
+        genre: "Violin Techno",
+        bpm: 130,
+        color: "#cc00ff",
+        colorHex: 0xcc00ff,
+        worldColor: 0x0a0118,
+        groundColor: 0x180030,
+        neonColor: 0xcc00ff,
+        avatar: "zara_avatar.jpg",
+        synthFreq: 82.4, // E2
+        promo: {
+            title: "ZARA — Violin Techno Night (Zona T)",
+            code: "ZARA20",
+            discount: "20% OFF en la puerta",
+            venue: "Club Bling Bling - Zona Rosa"
+        }
     }
 ];
 
@@ -387,11 +406,16 @@ class ZonaTRunnerGame {
             const card = document.createElement("div");
             card.className = `dj-card ${idx === 0 ? "selected" : ""}`;
             card.dataset.id = dj.id;
+
+            const avatarContent = dj.avatar
+                ? `<img src="${dj.avatar}" alt="${dj.name}" style="width:100%; height:100%; object-fit:cover; object-position:top; border-radius:8px;">`
+                : `<span style="font-size:2rem;">🎧</span>`;
+
             card.innerHTML = `
-                <div class="dj-avatar" style="background: ${dj.color}22; color: ${dj.color}; border-color: ${dj.color}">
-                    🎧
+                <div class="dj-avatar" style="background: ${dj.color}22; border-color: ${dj.color}; overflow:hidden; padding:0;">
+                    ${avatarContent}
                 </div>
-                <div class="dj-name">${dj.name}</div>
+                <div class="dj-name" style="color:${dj.color}">${dj.name}</div>
                 <div class="dj-genre">${dj.genre}</div>
                 <div class="dj-bpm">${dj.bpm} BPM</div>
             `;
