@@ -39,7 +39,14 @@ namespace ZonaTRunner.Core
 
         private void Start()
         {
-            SetState(GameState.MainMenu);
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Gameplay")
+            {
+                StartRun();
+            }
+            else
+            {
+                SetState(GameState.MainMenu);
+            }
         }
 
         private void Update()

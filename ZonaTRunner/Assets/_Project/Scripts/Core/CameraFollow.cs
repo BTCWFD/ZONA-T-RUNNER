@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 namespace ZonaTRunner.Core {
     public class CameraFollow : MonoBehaviour {
         public Transform target;
@@ -10,6 +10,7 @@ namespace ZonaTRunner.Core {
             }
             if (target != null) {
                 transform.position = target.position + offset;
+                transform.rotation = Quaternion.Euler(20f, 0f, 0f);
             }
         }
     }
