@@ -102,8 +102,8 @@ const DJS = [
         }
     },
     {
-        id: "dj_zara",
-        name: "ZARA",
+        id: "dj_letal",
+        name: "LETAL",
         genre: "Violin Techno",
         bpm: 130,
         color: "#cc00ff",
@@ -114,8 +114,8 @@ const DJS = [
         avatar: "zara_avatar.jpg",
         synthFreq: 82.4, // E2
         promo: {
-            title: "ZARA — Violin Techno Night (Zona T)",
-            code: "ZARA20",
+            title: "LETAL — Violin Techno Night (Zona T)",
+            code: "LETAL20",
             discount: "20% OFF en la puerta",
             venue: "Club Bling Bling - Zona Rosa"
         }
