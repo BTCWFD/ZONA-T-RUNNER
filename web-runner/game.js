@@ -125,16 +125,17 @@ const DJS = [
         name: "DJ NUÑEZ",
         genre: "Tech House / Groove",
         bpm: 128,
-        color: "#ff7700",
-        colorHex: 0xff7700,
-        worldColor: 0x140700,
-        groundColor: 0x240e00,
-        neonColor: 0xff8800,
+        color: "#ff5500",
+        colorHex: 0xff5500,
+        worldColor: 0x180800,
+        groundColor: 0x280e00,
+        neonColor: 0xff6600,
+        avatar: "nunez_3d.jpg",
         synthFreq: 61.74, // B1
         promo: {
-            title: "DJ NUÑEZ — Groove Session (Baum Club)",
-            code: "NUNEZ15",
-            discount: "15% OFF en Preventa",
+            title: "DJ NUÑEZ — El Toro en Llamas (Baum Club)",
+            code: "TORO15",
+            discount: "15% OFF + Stomp Pass",
             venue: "Baum Club - Calle 33"
         }
     },
@@ -753,6 +754,120 @@ class ZonaTRunnerGame {
             this.player.add(rightArm);
             this.limbs.rightArm = rightArm;
 
+        } else if (this.selectedDJ.id === "dj_nunez") {
+            // === 🐂🔥 DJ NUÑEZ: "EL TORO EN LLAMAS" (Tall, lean, Venezuelan DJ, 1-2-3-4 right foot stomp) ===
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xdca888, roughness: 0.65 });
+            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f7, roughness: 0.6 });
+            const blackShirtMat = new THREE.MeshStandardMaterial({ color: 0x111116, roughness: 0.7 });
+            const darkPantsMat = new THREE.MeshStandardMaterial({ color: 0x14141d, roughness: 0.8 });
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x1e1512, roughness: 0.9 });
+            const flameNeonMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
+
+            this.playerMesh = new THREE.Group();
+            this.playerMesh.position.y = 1.42; // Tall lean posture
+            this.player.add(this.playerMesh);
+
+            // 1. Tall Lean Torso (Two-tone White & Black Streetwear Shirt)
+            const upperTorsoGeo = new THREE.BoxGeometry(0.85, 0.6, 0.44);
+            const upperTorso = new THREE.Mesh(upperTorsoGeo, whiteShirtMat);
+            upperTorso.position.y = 0.32;
+            this.playerMesh.add(upperTorso);
+
+            // Glowing Flaming Bull Chest Emblem
+            const bullEmblemGeo = new THREE.BoxGeometry(0.28, 0.22, 0.05);
+            const bullEmblem = new THREE.Mesh(bullEmblemGeo, flameNeonMat);
+            bullEmblem.position.set(0, 0.32, 0.24);
+            this.playerMesh.add(bullEmblem);
+
+            // Silver cross chain necklace
+            const crossChainGeo = new THREE.BoxGeometry(0.06, 0.12, 0.04);
+            const crossChain = new THREE.Mesh(crossChainGeo, new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.9 }));
+            crossChain.position.set(0, 0.46, 0.24);
+            this.playerMesh.add(crossChain);
+
+            // Lower Torso (Black section of two-tone tee)
+            const lowerTorsoGeo = new THREE.BoxGeometry(0.82, 0.55, 0.42);
+            const lowerTorso = new THREE.Mesh(lowerTorsoGeo, blackShirtMat);
+            lowerTorso.position.y = -0.22;
+            this.playerMesh.add(lowerTorso);
+
+            // 2. Head & Facial Hair (Fade, curly top, neat beard)
+            const headGeo = new THREE.BoxGeometry(0.48, 0.54, 0.48);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 0.92, 0.02);
+            this.playerMesh.add(head);
+
+            // Textured Curly Hair Top
+            const hairGeo = new THREE.BoxGeometry(0.46, 0.22, 0.44);
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.set(0, 1.22, -0.02);
+            this.playerMesh.add(hair);
+
+            // Trimmed Goatee / Beard
+            const beardGeo = new THREE.BoxGeometry(0.38, 0.2, 0.18);
+            const beard = new THREE.Mesh(beardGeo, hairMat);
+            beard.position.set(0, 0.76, 0.18);
+            this.playerMesh.add(beard);
+
+            // 3. DJ Headphones around neck (from his DJ booth photo)
+            const hpGroup = new THREE.Group();
+            hpGroup.position.set(0, 0.65, 0.05);
+            const hpBandGeo = new THREE.TorusGeometry(0.24, 0.04, 8, 16, Math.PI);
+            const hpBand = new THREE.Mesh(hpBandGeo, blackShirtMat);
+            hpBand.rotation.x = Math.PI / 2;
+            hpGroup.add(hpBand);
+
+            const hpCupL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12), flameNeonMat);
+            hpCupL.position.set(-0.25, 0, 0.08);
+            hpCupL.rotation.z = Math.PI / 2;
+            hpGroup.add(hpCupL);
+
+            const hpCupR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12), flameNeonMat);
+            hpCupR.position.set(0.25, 0, 0.08);
+            hpCupR.rotation.z = Math.PI / 2;
+            hpGroup.add(hpCupR);
+            this.playerMesh.add(hpGroup);
+
+            // 4. Arms (White short sleeves + skin forearms)
+            const armGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.78, 10);
+            const leftArm = new THREE.Mesh(armGeo, skinMat);
+            leftArm.position.set(-0.54, 1.35, 0);
+            this.player.add(leftArm);
+            this.limbs.leftArm = leftArm;
+
+            const rightArm = new THREE.Mesh(armGeo, skinMat);
+            rightArm.position.set(0.54, 1.35, 0);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+
+            // 5. Tall Slim Cargo Joggers & Sneakers
+            const legGeo = new THREE.CylinderGeometry(0.14, 0.11, 0.95, 12);
+            const leftLeg = new THREE.Mesh(legGeo, darkPantsMat);
+            leftLeg.position.set(-0.22, 0.46, 0);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            // RIGHT LEG & SNEAKER: 🔥 "EL TORO EN LLAMAS" 1-2-3-4 FLAMING STOMP FOOT 🔥
+            const rightLegGroup = new THREE.Group();
+            rightLegGroup.position.set(0.22, 0.46, 0);
+            const rightLegMesh = new THREE.Mesh(legGeo, darkPantsMat);
+            rightLegGroup.add(rightLegMesh);
+
+            // Flaming sole / aura on right foot
+            const flameAuraGeo = new THREE.BoxGeometry(0.26, 0.22, 0.42);
+            const flameAura = new THREE.Mesh(flameAuraGeo, flameNeonMat);
+            flameAura.position.set(0, -0.42, 0.08);
+            rightLegGroup.add(flameAura);
+
+            // Glowing Flame Light on right foot
+            const footFlameLight = new THREE.PointLight(0xff4400, 2.0, 5.5);
+            footFlameLight.position.set(0, -0.38, 0.15);
+            rightLegGroup.add(footFlameLight);
+            this.flameLight = footFlameLight;
+
+            this.player.add(rightLegGroup);
+            this.limbs.rightLeg = rightLegGroup;
+
         } else if (this.selectedDJ.isFemale) {
             // === 🎀 FEMALE DJ CYBER-RUNNER (DJ STHEP & CAMILA LEURO) ===
             const suitMat = new THREE.MeshStandardMaterial({
@@ -1247,6 +1362,20 @@ class ZonaTRunnerGame {
             if (this.limbs.rightLeg) this.limbs.rightLeg.rotation.x = 0.4;
             if (this.limbs.leftArm) this.limbs.leftArm.rotation.x = -1.2;
             if (this.limbs.rightArm) this.limbs.rightArm.rotation.x = -1.2;
+        }
+
+        // 🐂🔥 DJ NUÑEZ: "EL TORO EN LLAMAS" 1-2-3-4 FLAMING STOMP COMPÁS
+        if (this.selectedDJ.id === "dj_nunez" && this.flameLight) {
+            const beatTime = this.runAnimTime * 2.2;
+            const beatSub = beatTime % 1.0;
+            const beatIndex = Math.floor(beatTime % 4) + 1; // 1, 2, 3, 4
+            const flamePulse = (1.0 - beatSub) * 2.6 + 0.9;
+            this.flameLight.intensity = flamePulse;
+            if (beatIndex === 4) {
+                this.flameLight.color.setHex(0xffcc00); // 4th beat explosion!
+            } else {
+                this.flameLight.color.setHex(0xff4400);
+            }
         }
 
         // Camera Follow & Dynamic Speed FOV Warp (EXXO Runner camera logic)
