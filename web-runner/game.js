@@ -503,6 +503,23 @@ class ZonaTRunnerGame {
         this.initThree();
         this.initRain();
         this.bindEvents();
+
+        // Query parameters for automation and testing (?dj=dj_nunez&autostart=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const djParam = urlParams.get("dj");
+        if (djParam) {
+            const matchedDJ = DJS.find(d => d.id === djParam);
+            if (matchedDJ) {
+                const cardEl = document.querySelector(`.dj-card[data-id="${matchedDJ.id}"]`);
+                if (cardEl) this.selectDJ(matchedDJ, cardEl);
+            }
+        }
+        if (urlParams.get("autostart") === "1") {
+            setTimeout(() => {
+                const startBtn = document.getElementById("btn-start-run");
+                if (startBtn) startBtn.click();
+            }, 400);
+        }
     }
 
     initDOM() {
@@ -558,8 +575,10 @@ class ZonaTRunnerGame {
 
     applyDJTheme() {
         if (!this.scene) return;
-        this.scene.background = new THREE.Color(this.selectedDJ.worldColor);
-        this.scene.fog = new THREE.FogExp2(this.selectedDJ.worldColor, 0.014);
+        // Cyberpunk Bogotá midnight navy atmosphere (Image 2 style)
+        const skyColor = 0x060913;
+        this.scene.background = new THREE.Color(skyColor);
+        this.scene.fog = new THREE.FogExp2(skyColor, 0.007);
 
         if (this.player) {
             const posX = this.player.position.x;
@@ -571,26 +590,418 @@ class ZonaTRunnerGame {
         }
     }
 
+    initCyberpunkAssets() {
+        this.cyberpunkTextures = {};
+
+        // 1. BAUM FESTIVAL LED Megascreen (Matching Image 2 exactly)
+        this.cyberpunkTextures.baum = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1024;
+            canvas.height = 512;
+            const ctx = canvas.getContext("2d");
+
+            // Cosmic midnight background
+            const bgGrad = ctx.createLinearGradient(0, 0, 1024, 512);
+            bgGrad.addColorStop(0, "#030611");
+            bgGrad.addColorStop(0.5, "#080c26");
+            bgGrad.addColorStop(1, "#030614");
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1024, 512);
+
+            // Magenta & Cyan Energy Aura/Wisps (like Image 2)
+            ctx.save();
+            const radCyan = ctx.createRadialGradient(280, 256, 10, 280, 256, 260);
+            radCyan.addColorStop(0, "rgba(0, 255, 235, 0.9)");
+            radCyan.addColorStop(0.4, "rgba(0, 190, 255, 0.45)");
+            radCyan.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.fillStyle = radCyan;
+            ctx.fillRect(50, 20, 500, 472);
+
+            const radMag = ctx.createRadialGradient(744, 256, 10, 744, 256, 260);
+            radMag.addColorStop(0, "rgba(255, 0, 170, 0.9)");
+            radMag.addColorStop(0.4, "rgba(200, 0, 230, 0.45)");
+            radMag.addColorStop(1, "rgba(0, 0, 0, 0)");
+            ctx.fillStyle = radMag;
+            ctx.fillRect(474, 20, 500, 472);
+            ctx.restore();
+
+            // Concentric Glowing Neon Portal Circle
+            ctx.save();
+            ctx.lineWidth = 16;
+            ctx.shadowBlur = 32;
+            ctx.shadowColor = "#00ffff";
+            const ringGrad = ctx.createLinearGradient(320, 100, 704, 412);
+            ringGrad.addColorStop(0, "#00ffff");
+            ringGrad.addColorStop(0.4, "#ffffff");
+            ringGrad.addColorStop(1, "#ff0099");
+            ctx.strokeStyle = ringGrad;
+            ctx.beginPath();
+            ctx.arc(512, 256, 155, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // White hot core
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "#ffffff";
+            ctx.shadowBlur = 15;
+            ctx.stroke();
+            ctx.restore();
+
+            // Bold Typography: "BAUM" and "FESTIVAL"
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "#ffffff";
+            ctx.shadowBlur = 24;
+            ctx.font = '900 86px "Arial Black", "Montserrat", sans-serif';
+            ctx.fillText("BAUM", 512, 222);
+
+            ctx.font = '800 42px "Arial Black", "Montserrat", sans-serif';
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 18;
+            ctx.fillText("FESTIVAL", 512, 302);
+            ctx.restore();
+
+            // Digital LED Scanlines
+            ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
+            for (let y = 0; y < 512; y += 4) {
+                ctx.fillRect(0, y, 1024, 2);
+            }
+
+            // Outer Neon Border
+            ctx.strokeStyle = "#00e5ff";
+            ctx.lineWidth = 8;
+            ctx.strokeRect(6, 6, 1012, 500);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            return tex;
+        })();
+
+        // 2. CLUB OCTAVA Sign (Matching Image 2 left facade)
+        this.cyberpunkTextures.octava = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1024;
+            canvas.height = 256;
+            const ctx = canvas.getContext("2d");
+
+            // Deep glossy plate backing
+            ctx.fillStyle = "rgba(4, 8, 16, 0.96)";
+            ctx.fillRect(0, 0, 1024, 256);
+
+            // Double Cyan Neon Border
+            ctx.strokeStyle = "#00ffff";
+            ctx.lineWidth = 10;
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 35;
+            ctx.strokeRect(10, 14, 1004, 228);
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#ffffff";
+            ctx.shadowBlur = 12;
+            ctx.strokeRect(18, 22, 988, 212);
+
+            // Intense Neon Outline Letters: "CLUB OCTAVA"
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = '900 114px "Arial Black", "Montserrat", sans-serif';
+
+            // Outer cyan bloom
+            ctx.shadowColor = "#00f0ff";
+            ctx.shadowBlur = 50;
+            ctx.strokeStyle = "#00f0ff";
+            ctx.lineWidth = 22;
+            ctx.strokeText("CLUB OCTAVA", 512, 128);
+
+            // Medium electric glow
+            ctx.shadowBlur = 22;
+            ctx.strokeStyle = "#80ffff";
+            ctx.lineWidth = 10;
+            ctx.strokeText("CLUB OCTAVA", 512, 128);
+
+            // Core pure white tube
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#ffffff";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText("CLUB OCTAVA", 512, 128);
+
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        // 3. ANDRÉS D.C. Sign (Matching Image 2 colorful brick sign)
+        this.cyberpunkTextures.andresDC = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1024;
+            canvas.height = 256;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "rgba(12, 6, 6, 0.95)";
+            ctx.fillRect(0, 0, 1024, 256);
+
+            ctx.strokeStyle = "#ff4400";
+            ctx.lineWidth = 10;
+            ctx.shadowColor = "#ff5500";
+            ctx.shadowBlur = 30;
+            ctx.strokeRect(10, 14, 1004, 228);
+
+            const text = "ANDRÉS D.C.";
+            const colors = ["#ff2244", "#ff8800", "#ffdd00", "#00ff66", "#00d9ff", "#ff0099", "#ffcc00", "#ffea00", "#00ffff", "#ff2244", "#ffea00"];
+
+            ctx.font = '900 110px "Arial Black", "Impact", sans-serif';
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+
+            let startX = 115;
+            const stepX = 79;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const col = colors[i % colors.length];
+                const cx = startX + (i * stepX);
+
+                ctx.shadowColor = col;
+                ctx.shadowBlur = 42;
+                ctx.fillStyle = col;
+                ctx.fillText(char, cx, 128);
+
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = "#ffffff";
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(char, cx, 128);
+            }
+
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        // 4. BAUM CLUB Sign (Purple/Magenta club sign)
+        this.cyberpunkTextures.baumClub = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1024;
+            canvas.height = 256;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "rgba(12, 4, 18, 0.92)";
+            ctx.fillRect(0, 0, 1024, 256);
+
+            ctx.strokeStyle = "#d400ff";
+            ctx.lineWidth = 8;
+            ctx.shadowColor = "#d400ff";
+            ctx.shadowBlur = 28;
+            ctx.strokeRect(12, 16, 1000, 224);
+
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = '900 92px "Arial Black", "Montserrat", sans-serif';
+
+            ctx.shadowColor = "#d400ff";
+            ctx.shadowBlur = 36;
+            ctx.fillStyle = "#ff00dd";
+            ctx.fillText("BAUM CLUB", 512, 128);
+
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#ffffff";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText("BAUM CLUB", 512, 128);
+
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        // 5. KAPUTT Club Sign (Acid lime green)
+        this.cyberpunkTextures.kaputt = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1024;
+            canvas.height = 256;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "rgba(4, 14, 8, 0.92)";
+            ctx.fillRect(0, 0, 1024, 256);
+
+            ctx.strokeStyle = "#39ff14";
+            ctx.lineWidth = 8;
+            ctx.shadowColor = "#39ff14";
+            ctx.shadowBlur = 28;
+            ctx.strokeRect(12, 16, 1000, 224);
+
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = '900 96px "Arial Black", "Montserrat", sans-serif';
+
+            ctx.shadowColor = "#39ff14";
+            ctx.shadowBlur = 36;
+            ctx.fillStyle = "#39ff14";
+            ctx.fillText("KAPUTT", 512, 128);
+
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#ffffff";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText("KAPUTT", 512, 128);
+
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        // 6. Storefront Windows & Cocktails Signage
+        this.cyberpunkTextures.storefronts = [
+            (() => {
+                const canvas = document.createElement("canvas");
+                canvas.width = 512;
+                canvas.height = 256;
+                const ctx = canvas.getContext("2d");
+                const grad = ctx.createLinearGradient(0, 0, 512, 256);
+                grad.addColorStop(0, "#2c0e04");
+                grad.addColorStop(1, "#521d0a");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 256);
+                ctx.strokeStyle = "#0d0f17";
+                ctx.lineWidth = 8;
+                ctx.strokeRect(0, 0, 512, 256);
+                ctx.strokeRect(256, 0, 2, 256);
+                ctx.font = '800 48px "Arial Black", sans-serif';
+                ctx.textAlign = "center";
+                ctx.shadowColor = "#ffaa00";
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = "#ffdd44";
+                ctx.fillText("COCKTAILS & BEATS", 256, 128);
+                return new THREE.CanvasTexture(canvas);
+            })(),
+            (() => {
+                const canvas = document.createElement("canvas");
+                canvas.width = 512;
+                canvas.height = 256;
+                const ctx = canvas.getContext("2d");
+                const grad = ctx.createLinearGradient(0, 0, 512, 256);
+                grad.addColorStop(0, "#081b2a");
+                grad.addColorStop(1, "#142c44");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 256);
+                ctx.strokeStyle = "#0d0f17";
+                ctx.lineWidth = 8;
+                ctx.strokeRect(0, 0, 512, 256);
+                ctx.strokeRect(256, 0, 2, 256);
+                ctx.font = '800 48px "Arial Black", sans-serif';
+                ctx.textAlign = "center";
+                ctx.shadowColor = "#00e5ff";
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = "#00ffff";
+                ctx.fillText("TECHNO RECORD STORE", 256, 128);
+                return new THREE.CanvasTexture(canvas);
+            })(),
+            (() => {
+                const canvas = document.createElement("canvas");
+                canvas.width = 512;
+                canvas.height = 256;
+                const ctx = canvas.getContext("2d");
+                const grad = ctx.createLinearGradient(0, 0, 512, 256);
+                grad.addColorStop(0, "#2a041f");
+                grad.addColorStop(1, "#440932");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 512, 256);
+                ctx.strokeStyle = "#0d0f17";
+                ctx.lineWidth = 8;
+                ctx.strokeRect(0, 0, 512, 256);
+                ctx.font = '800 52px "Arial Black", sans-serif';
+                ctx.textAlign = "center";
+                ctx.shadowColor = "#ff00aa";
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = "#ff0099";
+                ctx.fillText("ZONA T VIP CLUB", 256, 128);
+                return new THREE.CanvasTexture(canvas);
+            })()
+        ];
+
+        // 7. Authentic Bogotá Terracotta Brick Texture
+        this.cyberpunkTextures.brick = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "#1e1614";
+            ctx.fillRect(0, 0, 512, 512);
+
+            const rows = 16;
+            const cols = 8;
+            const rowH = 512 / rows;
+            const colW = 512 / cols;
+            const brickTones = ["#7c2b1e", "#8b3424", "#662218", "#993d2b", "#5c1d14", "#a1422f", "#732a1d"];
+
+            for (let r = 0; r < rows; r++) {
+                const y = r * rowH;
+                const offsetX = (r % 2 === 0) ? 0 : (colW / 2);
+                for (let c = -1; c <= cols + 1; c++) {
+                    const x = c * colW + offsetX;
+                    ctx.fillStyle = brickTones[Math.floor(Math.random() * brickTones.length)];
+                    ctx.fillRect(x + 2, y + 2, colW - 4, rowH - 4);
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
+                    ctx.fillRect(x + 2, y + rowH - 5, colW - 4, 3);
+                }
+            }
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(2, 4);
+            return tex;
+        })();
+
+        // 8. Skyscraper Windows Texture
+        this.cyberpunkTextures.windows = (() => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "#0c111c";
+            ctx.fillRect(0, 0, 512, 512);
+
+            const rows = 12;
+            const cols = 8;
+            const rw = 512 / cols;
+            const rh = 512 / rows;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const rnd = Math.random();
+                    if (rnd < 0.28) {
+                        ctx.fillStyle = "rgba(255, 230, 160, 0.85)";
+                    } else if (rnd < 0.44) {
+                        ctx.fillStyle = "rgba(0, 230, 255, 0.8)";
+                    } else if (rnd < 0.52) {
+                        ctx.fillStyle = "rgba(255, 0, 128, 0.75)";
+                    } else {
+                        ctx.fillStyle = "rgba(16, 24, 38, 0.9)";
+                    }
+                    ctx.fillRect(c * rw + 6, r * rh + 6, rw - 12, rh - 12);
+                }
+            }
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(1, 3);
+            return tex;
+        })();
+    }
+
     initThree() {
         const canvas = document.getElementById("game-canvas");
         this.scene = new THREE.Scene();
         this.applyDJTheme();
 
-        this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 220);
-        this.camera.position.set(0, 4.6, -6.5);
-        this.camera.lookAt(0, 2.1, 9);
+        this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 240);
+        this.camera.position.set(0, 4.4, -6.5);
+        this.camera.lookAt(0, 2.7, 18);
 
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Lights
-        const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+        // Atmospheric Cyberpunk Lights
+        const ambient = new THREE.AmbientLight(0x28324a, 0.9);
         this.scene.add(ambient);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-        dirLight.position.set(6, 18, 12);
+        const dirLight = new THREE.DirectionalLight(0x7c9bc2, 0.85);
+        dirLight.position.set(8, 24, 12);
         this.scene.add(dirLight);
+
+        // Procedural Cyberpunk Assets & Neon Signs
+        this.initCyberpunkAssets();
 
         // 3D Player Character Assembly
         this.buildPlayerCharacter();
@@ -1089,7 +1500,8 @@ class ZonaTRunnerGame {
         this.collectibles = [];
         this.powerUpItems = [];
         this.billboards = [];
-        this.lastSpawnZ = -10;
+        this.lastSpawnZ = -14;
+        this.segmentCount = 0;
 
         for (let i = 0; i < 11; i++) {
             this.spawnTrackSegment(i < 3);
@@ -1100,220 +1512,321 @@ class ZonaTRunnerGame {
         const segLen = 28;
         const segment = new THREE.Group();
         segment.position.z = this.lastSpawnZ;
+        const segIndex = this.segmentCount++;
 
-
-        // 1. Bogotá Zona T Wet Asphalt Roadway
-        const roadGeo = new THREE.PlaneGeometry(11.2, segLen);
+        // 1. Bogotá Zona T Wet Asphalt Roadway (Image 2 Style)
+        const streetWidth = 10.4;
+        const roadGeo = new THREE.PlaneGeometry(streetWidth, segLen);
         const roadMat = new THREE.MeshStandardMaterial({
-            color: this.selectedDJ.groundColor || 0x120a1b,
-            roughness: 0.45,
-            metalness: 0.35
+            color: 0x070a10,
+            roughness: 0.1,
+            metalness: 0.72
         });
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
         road.position.z = segLen / 2;
         segment.add(road);
 
-        // Neon Lane Divider Stripes
-        [-this.laneDistance / 2, this.laneDistance / 2].forEach(x => {
-            const lineGeo = new THREE.PlaneGeometry(0.18, segLen);
-            const lineMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
+        // Double Solid Yellow Center Line (Image 2 Key Feature)
+        [-0.15, 0.15].forEach(x => {
+            const lineGeo = new THREE.PlaneGeometry(0.12, segLen);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xffd000 });
             const line = new THREE.Mesh(lineGeo, lineMat);
             line.rotation.x = -Math.PI / 2;
-            line.position.set(x, 0.02, segLen / 2);
+            line.position.set(x, 0.025, segLen / 2);
             segment.add(line);
         });
 
-        // 2. Zona T Sidewalks (Andenes de Adoquín Bogotano con Bolardos)
-        const paverMat = new THREE.MeshStandardMaterial({ color: 0x24242d, roughness: 0.85 });
-        const curbMat = new THREE.MeshStandardMaterial({ color: 0x3d3d4a, roughness: 0.6 });
-        const bollardMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.7, roughness: 0.3 });
+        // Glowing Electric Cyan Curb Strips (Image 2 Key Feature along both curbs)
+        [-4.95, 4.95].forEach(x => {
+            const stripGeo = new THREE.PlaneGeometry(0.24, segLen);
+            const stripMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff });
+            const strip = new THREE.Mesh(stripGeo, stripMat);
+            strip.rotation.x = -Math.PI / 2;
+            strip.position.set(x, 0.035, segLen / 2);
+            segment.add(strip);
+        });
 
-        [-7.8, 7.8].forEach(sideX => {
+        // 2. Zona T Sidewalks (Andenes anchos con Bolardos Bogotanos negros y Farolas)
+        const paverMat = new THREE.MeshStandardMaterial({ color: 0x1a1e27, roughness: 0.6 });
+        const curbMat = new THREE.MeshStandardMaterial({ color: 0x2b323c, roughness: 0.5 });
+        const metalMat = new THREE.MeshStandardMaterial({ color: 0x111317, metalness: 0.85, roughness: 0.2 });
+
+        [-7.6, 7.6].forEach(sideX => {
             // Sidewalk Pavers
-            const swGeo = new THREE.BoxGeometry(4.4, 0.22, segLen);
+            const swGeo = new THREE.BoxGeometry(4.8, 0.22, segLen);
             const sidewalk = new THREE.Mesh(swGeo, paverMat);
             sidewalk.position.set(sideX, 0.11, segLen / 2);
             segment.add(sidewalk);
 
             // Curb Border
-            const curbEdgeX = sideX > 0 ? 5.55 : -5.55;
-            const curbGeo = new THREE.BoxGeometry(0.3, 0.26, segLen);
+            const curbEdgeX = sideX > 0 ? 5.15 : -5.15;
+            const curbGeo = new THREE.BoxGeometry(0.28, 0.26, segLen);
             const curb = new THREE.Mesh(curbGeo, curbMat);
             curb.position.set(curbEdgeX, 0.13, segLen / 2);
             segment.add(curb);
 
-            // Typical Bogotá Security Bollards (Bolardos cilíndricos negros de la 82)
-            for (let bz = 4; bz < segLen; bz += 7) {
-                const bGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.75, 10);
-                const bollard = new THREE.Mesh(bGeo, bollardMat);
-                const bx = sideX > 0 ? 5.85 : -5.85;
+            // Typical Bogotá Security Bollards (Bolardos cilíndricos negros con franja reflectiva)
+            for (let bz = 3.5; bz < segLen; bz += 5.2) {
+                const bGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.82, 12);
+                const bollard = new THREE.Mesh(bGeo, metalMat);
+                const bx = sideX > 0 ? 5.5 : -5.5;
                 bollard.position.set(bx, 0.45, bz);
                 segment.add(bollard);
+
+                // Reflective white top ring on bollard (like Image 2)
+                const ringGeo = new THREE.CylinderGeometry(0.122, 0.122, 0.08, 12);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0xe0e6ed });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.position.set(bx, 0.78, bz);
+                segment.add(ring);
             }
-
-            // Bogotá Curved Streetlamp
-            const lampPoleGeo = new THREE.CylinderGeometry(0.08, 0.08, 5.2, 8);
-            const lampPole = new THREE.Mesh(lampPoleGeo, bollardMat);
-            const lampX = sideX > 0 ? 7.2 : -7.2;
-            lampPole.position.set(lampX, 2.6, segLen * 0.5);
-            segment.add(lampPole);
-
-            const lampHeadGeo = new THREE.BoxGeometry(0.6, 0.15, 0.4);
-            const lampHeadMat = new THREE.MeshBasicMaterial({ color: 0xffeedd });
-            const lampHead = new THREE.Mesh(lampHeadGeo, lampHeadMat);
-            lampHead.position.set(sideX > 0 ? lampX - 0.3 : lampX + 0.3, 5.1, segLen * 0.5);
-            segment.add(lampHead);
         });
 
-        // 3. Zona T Commercial & Nightclub Architecture (Calle 82 / Andino Style)
-        const brickMat = new THREE.MeshStandardMaterial({ color: 0x7c3522, roughness: 0.88 }); // Ladrillo Bogotano
-        const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0c1622, metalness: 0.85, roughness: 0.15 });
-        const clubNames = ["CLUB OCTAVA", "ANDRÉS D.C.", "BAUM CLUB", "BLING BLING", "KAPUTT", "VLAK", "RADIO BERLIN"];
+        // 3. Cyberpunk Nightclub Architecture & Glowing Neon Signs (Image 2 Key Elements!)
+        const brickMat = new THREE.MeshStandardMaterial({
+            map: this.cyberpunkTextures.brick,
+            roughness: 0.85
+        });
+        const windowMat = new THREE.MeshBasicMaterial({
+            map: this.cyberpunkTextures.windows
+        });
 
-        [-13.8, 13.8].forEach((bldgX, idx) => {
-            const bHeight = 16 + (Math.sin(this.lastSpawnZ * 0.05 + idx) * 5 + 5); // 16m to 26m
-            const bldgGroup = new THREE.Group();
-            bldgGroup.position.set(bldgX, bHeight / 2, segLen / 2);
+        // =========================================================================
+        // SCREEN LEFT (+X = +11.8): THE ICONIC BOGOTÁ NIGHTCLUBS (CLUB OCTAVA & ANDRÉS D.C.)
+        // In Image 2, Club Octava is in foreground and Andrés D.C. is directly next to it!
+        // =========================================================================
+        const leftHalfLen = segLen / 2; // 14m per facade
 
-            // Brick Main Body
-            const bodyGeo = new THREE.BoxGeometry(7.6, bHeight, segLen);
-            const body = new THREE.Mesh(bodyGeo, brickMat);
-            bldgGroup.add(body);
+        // --- SUB-FACADE 1: CLUB OCTAVA (z from 0 to 14) ---
+        {
+            const octBldgHeight = 22;
+            const octBldg = new THREE.Group();
+            octBldg.position.set(11.8, octBldgHeight / 2, leftHalfLen * 0.5);
 
-            // Reflective Glass Window Strips (Pisos superiores)
-            for (let fy = 4; fy < bHeight - 2; fy += 3.2) {
-                const winGeo = new THREE.BoxGeometry(0.2, 1.6, segLen - 3);
-                const win = new THREE.Mesh(winGeo, darkGlassMat);
-                win.position.set(bldgX > 0 ? -3.72 : 3.72, fy - (bHeight / 2), 0);
-                bldgGroup.add(win);
-            }
+            // Brick Body
+            const bBody = new THREE.Mesh(new THREE.BoxGeometry(6.6, octBldgHeight, leftHalfLen), brickMat);
+            octBldg.add(bBody);
 
-            // Ground Floor: Club & Boutique Storefront Entrance
-            const clubName = clubNames[(Math.floor(Math.abs(this.lastSpawnZ) / segLen) + idx) % clubNames.length];
-            const canopyGeo = new THREE.BoxGeometry(3.6, 0.35, 6.5);
-            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x111118, metalness: 0.7 });
+            // Windows upper floor
+            const bWin = new THREE.Mesh(new THREE.PlaneGeometry(leftHalfLen - 1.5, octBldgHeight - 8), windowMat);
+            bWin.rotation.y = -Math.PI / 2;
+            bWin.position.set(-3.32, 3.2, 0);
+            octBldg.add(bWin);
+
+            // Club Octava Entrance Canopy extending over sidewalk
+            const canopyGeo = new THREE.BoxGeometry(4.0, 0.45, 9.6);
+            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, metalness: 0.9, roughness: 0.25 });
             const canopy = new THREE.Mesh(canopyGeo, canopyMat);
-            canopy.position.set(bldgX > 0 ? -4.8 : 4.8, 3.4 - (bHeight / 2), 0);
-            bldgGroup.add(canopy);
+            canopy.position.set(-4.8, 4.0 - (octBldgHeight / 2), 0);
+            octBldg.add(canopy);
 
-            // Glowing Neon Club Sign under canopy
-            const neonSignGeo = new THREE.BoxGeometry(0.15, 0.65, 4.8);
-            const neonSignMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
-            const neonSign = new THREE.Mesh(neonSignGeo, neonSignMat);
-            neonSign.position.set(bldgX > 0 ? -4.9 : 4.9, 3.8 - (bHeight / 2), 0);
-            bldgGroup.add(neonSign);
+            // Glowing Downlight Under Canopy
+            const underCanopyLight = new THREE.PointLight(0x00f0ff, 2.5, 12);
+            underCanopyLight.position.set(-4.8, 3.6 - (octBldgHeight / 2), 0);
+            octBldg.add(underCanopyLight);
 
-            // Rooftop Antennas / Towers with Red Aviation Beacons
-            const antennaGeo = new THREE.CylinderGeometry(0.06, 0.06, 4.5, 6);
-            const antenna = new THREE.Mesh(antennaGeo, bollardMat);
-            antenna.position.set(0, (bHeight / 2) + 2.25, (idx === 0 ? -6 : 6));
-            bldgGroup.add(antenna);
+            // Large Cyan Neon Sign: "CLUB OCTAVA" (Mounted on canopy front facing oncoming runner)
+            const octSignGeo = new THREE.PlaneGeometry(6.6, 1.8);
+            const octSignMat = new THREE.MeshBasicMaterial({
+                map: this.cyberpunkTextures.octava,
+                side: THREE.DoubleSide
+            });
 
-            const beaconGeo = new THREE.SphereGeometry(0.18, 8, 8);
+            // Front edge sign mounted on top of canopy (facing oncoming player directly like Image 2!)
+            const octSignFront = new THREE.Mesh(octSignGeo, octSignMat);
+            octSignFront.rotation.y = Math.PI; // Faces oncoming player
+            octSignFront.position.set(-4.8, 4.2 - (octBldgHeight / 2) + 1.0, -4.8);
+            octBldg.add(octSignFront);
+
+            // Cyan Club Atmosphere PointLight
+            const octavaLight = new THREE.PointLight(0x00ffff, 4.0, 24);
+            octavaLight.position.set(5.8, 4.2, leftHalfLen * 0.5);
+            segment.add(octavaLight);
+
+            segment.add(octBldg);
+        }
+
+        // --- SUB-FACADE 2: ANDRÉS D.C. (z from 14 to 28) ---
+        {
+            const andresBldgHeight = 24;
+            const andresBldg = new THREE.Group();
+            andresBldg.position.set(11.8, andresBldgHeight / 2, leftHalfLen * 1.5);
+
+            // Bogotá Red Brick Body
+            const aBody = new THREE.Mesh(new THREE.BoxGeometry(6.6, andresBldgHeight, leftHalfLen), brickMat);
+            andresBldg.add(aBody);
+
+            // Windows upper floor
+            const aWin = new THREE.Mesh(new THREE.PlaneGeometry(leftHalfLen - 1.5, andresBldgHeight - 8), windowMat);
+            aWin.rotation.y = -Math.PI / 2;
+            aWin.position.set(-3.32, 3.2, 0);
+            andresBldg.add(aWin);
+
+            // Colorful Neon Sign: "ANDRÉS D.C." (Mounted on brick facade facing oncoming traffic and runner!)
+            const andresSignGeo = new THREE.PlaneGeometry(6.4, 1.8);
+            const andresSignMat = new THREE.MeshBasicMaterial({
+                map: this.cyberpunkTextures.andresDC,
+                side: THREE.DoubleSide
+            });
+            const andresSign = new THREE.Mesh(andresSignGeo, andresSignMat);
+            andresSign.rotation.y = Math.PI * 0.88; // Angled facing oncoming traffic and runner!
+            andresSign.position.set(-3.6, 6.8 - (andresBldgHeight / 2), -3.2);
+            andresBldg.add(andresSign);
+
+            // Entrance canopy
+            const aCanopyGeo = new THREE.BoxGeometry(3.2, 0.35, 5.8);
+            const aCanopyMat = new THREE.MeshStandardMaterial({ color: 0x140804, metalness: 0.6, roughness: 0.3 });
+            const aCanopy = new THREE.Mesh(aCanopyGeo, aCanopyMat);
+            aCanopy.position.set(-4.2, 3.8 - (andresBldgHeight / 2), 0);
+            andresBldg.add(aCanopy);
+
+            // Warm Orange/Amber party illumination spilling onto street
+            const andresLight = new THREE.PointLight(0xff5500, 3.8, 22);
+            andresLight.position.set(5.8, 4.0, leftHalfLen * 1.5);
+            segment.add(andresLight);
+
+            // Rooftop Antenna with Blinking Red Aviation Light
+            const antGeo = new THREE.CylinderGeometry(0.06, 0.06, 5.0, 6);
+            const ant = new THREE.Mesh(antGeo, metalMat);
+            ant.position.set(0, (andresBldgHeight / 2) + 2.5, 0);
+            andresBldg.add(ant);
+
+            const beaconGeo = new THREE.SphereGeometry(0.2, 8, 8);
             const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff0033 });
             const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-            beacon.position.set(0, (bHeight / 2) + 4.5, (idx === 0 ? -6 : 6));
-            bldgGroup.add(beacon);
+            beacon.position.set(0, (andresBldgHeight / 2) + 5.1, 0);
+            andresBldg.add(beacon);
 
-            segment.add(bldgGroup);
+            segment.add(andresBldg);
+        }
+
+        // =========================================================================
+        // SCREEN RIGHT (-X = -11.8): COMMERCIAL BRICK BUILDINGS & NEON STOREFRONTS (Like Image 2)
+        // =========================================================================
+        const rightBldgHeight = 25 + (Math.cos(segIndex * 1.7) * 4);
+        const rightBldg = new THREE.Group();
+        rightBldg.position.set(-11.8, rightBldgHeight / 2, segLen / 2); // -X is SCREEN RIGHT
+
+        const rightBodyGeo = new THREE.BoxGeometry(6.6, rightBldgHeight, segLen);
+        const rightBody = new THREE.Mesh(rightBodyGeo, brickMat);
+        rightBldg.add(rightBody);
+
+        // Windows Upper Rows
+        const rightWinGeo = new THREE.PlaneGeometry(segLen - 2, rightBldgHeight - 8);
+        const rightWin = new THREE.Mesh(rightWinGeo, windowMat);
+        rightWin.rotation.y = Math.PI / 2; // Facing street (+X)
+        rightWin.position.set(3.32, 3.5, 0);
+        rightBldg.add(rightWin);
+
+        // Multiple Ground Floor Illuminated Storefronts / Club vitrinas along street
+        [-leftHalfLen * 0.5, leftHalfLen * 0.5].forEach((sfZ, sidx) => {
+            const sfGeo = new THREE.PlaneGeometry(5.8, 3.4);
+            const sfTex = this.cyberpunkTextures.storefronts[(segIndex + sidx) % 3];
+            const sf = new THREE.Mesh(sfGeo, new THREE.MeshBasicMaterial({ map: sfTex }));
+            sf.rotation.y = Math.PI / 2;
+            sf.position.set(3.34, 1.8 - (rightBldgHeight / 2), sfZ);
+            rightBldg.add(sf);
+
+            // Neon Sign above vitrina
+            const rSignGeo = new THREE.PlaneGeometry(4.8, 1.4);
+            const rSignTex = ((segIndex + sidx) % 2 === 0) ? this.cyberpunkTextures.baumClub : this.cyberpunkTextures.kaputt;
+            const rSign = new THREE.Mesh(rSignGeo, new THREE.MeshBasicMaterial({ map: rSignTex, side: THREE.DoubleSide }));
+            rSign.rotation.y = Math.PI / 2;
+            rSign.position.set(3.35, 4.2 - (rightBldgHeight / 2), sfZ);
+            rightBldg.add(rSign);
         });
 
-        // 4. 🏙️ REAL ZONA T 3D LED BILLBOARDS (Native Digital Advertising)
-        const segIndex = Math.floor(Math.abs(this.lastSpawnZ) / segLen);
+        const rightLight = new THREE.PointLight((segIndex % 2 === 0) ? 0xcc00ff : 0x00ffcc, 2.5, 18);
+        rightLight.position.set(-5.8, 3.8, segLen / 2);
+        segment.add(rightLight);
 
-        // VALLA TIPO 1: Puente Pasarela Aéreo LED (Cruza toda la calle de la Zona T)
-        if (segIndex % 3 === 0 && this.billboardTextures && this.billboardTextures.length > 0) {
+        segment.add(rightBldg);
+
+        // =========================================================================
+        // 4. 🏙️ OVERHEAD SPACE-FRAME GANTRY WITH "BAUM FESTIVAL" MEGASCREEN (Image 2 Key Focal Point)
+        // Spans between Club Octava and Andrés D.C. or across the avenue
+        // =========================================================================
+        if (segIndex % 3 === 1) {
             const billboardGroup = new THREE.Group();
             billboardGroup.position.set(0, 0, segLen * 0.5);
 
-            // Steel Space-Frame Support Pylons (Left & Right)
-            [-6.4, 6.4].forEach(px => {
-                const pylonGeo = new THREE.BoxGeometry(0.5, 7.8, 0.5);
-                const pylon = new THREE.Mesh(pylonGeo, bollardMat);
-                pylon.position.set(px, 3.9, 0);
+            // Heavy Steel Lattice Pylons (Left & Right Sidewalks: ±6.0)
+            [-6.0, 6.0].forEach(px => {
+                const pylonGeo = new THREE.BoxGeometry(0.55, 9.6, 0.55);
+                const pylon = new THREE.Mesh(pylonGeo, metalMat);
+                pylon.position.set(px, 4.8, 0);
                 billboardGroup.add(pylon);
+
+                // Diagonal lattice braces
+                const strutGeo = new THREE.CylinderGeometry(0.06, 0.06, 4.6, 6);
+                const strut = new THREE.Mesh(strutGeo, metalMat);
+                strut.position.set(px > 0 ? px + 0.9 : px - 0.9, 3.9, 0);
+                strut.rotation.z = px > 0 ? -0.42 : 0.42;
+                billboardGroup.add(strut);
             });
 
-            // Overhead Horizontal Steel Truss
-            const trussGeo = new THREE.BoxGeometry(13.2, 0.5, 0.5);
-            const truss = new THREE.Mesh(trussGeo, bollardMat);
-            truss.position.set(0, 7.6, 0);
-            billboardGroup.add(truss);
+            // Top Horizontal Space-Frame Lattice Trusses
+            const topTrussGeo = new THREE.BoxGeometry(13.2, 0.6, 0.6);
+            const topTruss = new THREE.Mesh(topTrussGeo, metalMat);
+            topTruss.position.set(0, 9.0, 0);
+            billboardGroup.add(topTruss);
+
+            const bottomTrussGeo = new THREE.BoxGeometry(13.2, 0.45, 0.45);
+            const bottomTruss = new THREE.Mesh(bottomTrussGeo, metalMat);
+            bottomTruss.position.set(0, 4.6, 0);
+            billboardGroup.add(bottomTruss);
 
             // Monumental LED Display Screen Box
-            const screenFrameGeo = new THREE.BoxGeometry(9.4, 3.6, 0.4);
-            const screenFrameMat = new THREE.MeshStandardMaterial({ color: 0x08080f, metalness: 0.8, roughness: 0.2 });
+            const screenFrameGeo = new THREE.BoxGeometry(10.2, 4.4, 0.45);
+            const screenFrameMat = new THREE.MeshStandardMaterial({ color: 0x05070d, metalness: 0.85, roughness: 0.2 });
             const screenFrame = new THREE.Mesh(screenFrameGeo, screenFrameMat);
-            screenFrame.position.set(0, 6.4, 0);
+            screenFrame.position.set(0, 6.8, 0);
             billboardGroup.add(screenFrame);
 
-            // Front High-Res Digital Display Surface (Faces oncoming player)
-            const currentTex = this.billboardTextures[this.billboardCycle % this.billboardTextures.length];
-            this.billboardCycle++;
-
-            const screenFaceGeo = new THREE.PlaneGeometry(9.0, 3.2);
+            // Front High-Res Digital Display Surface: BAUM FESTIVAL (Faces oncoming player: -Z)
+            const screenTex = this.cyberpunkTextures.baum;
+            const screenFaceGeo = new THREE.PlaneGeometry(9.8, 4.0);
             const screenFaceMat = new THREE.MeshBasicMaterial({
-                map: currentTex,
-                color: 0xffffff,
+                map: screenTex,
                 side: THREE.DoubleSide
             });
             const screenFace = new THREE.Mesh(screenFaceGeo, screenFaceMat);
-            screenFace.position.set(0, 6.4, -0.22);
-            screenFace.rotation.y = Math.PI; // Faces toward camera (coming from -Z to +Z)
+            screenFace.position.set(0, 6.8, -0.25);
+            screenFace.rotation.y = Math.PI; // Faces toward oncoming runner
             billboardGroup.add(screenFace);
 
             // Glowing Neon Bezel Trims (Top & Bottom of screen)
-            [-1.7, 1.7].forEach(ny => {
-                const trimGeo = new THREE.BoxGeometry(9.4, 0.08, 0.45);
-                const trimMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+            [-2.05, 2.05].forEach(ny => {
+                const trimGeo = new THREE.BoxGeometry(10.2, 0.1, 0.5);
+                const trimMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
                 const trim = new THREE.Mesh(trimGeo, trimMat);
-                trim.position.set(0, 6.4 + ny, 0);
+                trim.position.set(0, 6.8 + ny, 0);
                 billboardGroup.add(trim);
             });
 
-            // Ambient downward billboard spotlight
-            const bbLight = new THREE.PointLight(0x00e5ff, 1.2, 8);
-            bbLight.position.set(0, 4.6, 0);
+            // Downward PointLight illuminating the road & runner
+            const bbLight = new THREE.PointLight(0x00e5ff, 2.8, 18);
+            bbLight.position.set(0, 4.8, 0);
             billboardGroup.add(bbLight);
 
             segment.add(billboardGroup);
         }
-        // VALLA TIPO 2: Tótem Publicitario LED en la Acera (Mupi Bogotano)
-        else if (segIndex % 3 === 1 && this.billboardTextures && this.billboardTextures.length > 0) {
-            const totemGroup = new THREE.Group();
-            const totemSideX = (segIndex % 2 === 0) ? -6.2 : 6.2;
-            totemGroup.position.set(totemSideX, 0, segLen * 0.45);
 
-            // Black Metal Totem Frame
-            const frameGeo = new THREE.BoxGeometry(1.6, 3.4, 0.35);
-            const frameMat = new THREE.MeshStandardMaterial({ color: 0x0d0d14, metalness: 0.8 });
-            const frame = new THREE.Mesh(frameGeo, frameMat);
-            frame.position.y = 1.7;
-            totemGroup.add(frame);
-
-            // Double Sided Illuminated Poster
-            const posterTex = this.billboardTextures[this.billboardCycle % this.billboardTextures.length];
-            this.billboardCycle++;
-
-            const posterGeo = new THREE.PlaneGeometry(1.4, 2.9);
-            const posterMat = new THREE.MeshBasicMaterial({ 
-                map: posterTex,
-                side: THREE.DoubleSide
+        // 5. Atmospheric Overhead Sky Lasers
+        if (segIndex % 2 === 0) {
+            const laserMat = new THREE.LineBasicMaterial({
+                color: (segIndex % 4 === 0) ? 0x00ffff : 0xff0088,
+                transparent: true,
+                opacity: 0.65
             });
-            const poster = new THREE.Mesh(posterGeo, posterMat);
-            poster.position.set(0, 1.7, -0.19);
-            poster.rotation.y = Math.PI;
-            totemGroup.add(poster);
-
-            // Neon Halo Top Cap
-            const capGeo = new THREE.BoxGeometry(1.65, 0.1, 0.4);
-            const capMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
-            const cap = new THREE.Mesh(capGeo, capMat);
-            cap.position.y = 3.42;
-            totemGroup.add(cap);
-
-            segment.add(totemGroup);
+            const points = [
+                new THREE.Vector3(-14, 18, 0),
+                new THREE.Vector3(14, 15, segLen)
+            ];
+            const laserGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const laser = new THREE.Line(laserGeo, laserMat);
+            segment.add(laser);
         }
 
         this.scene.add(segment);
@@ -1556,10 +2069,12 @@ class ZonaTRunnerGame {
             }
         }
 
-        // Camera Follow & Dynamic Speed FOV Warp (EXXO Runner camera logic)
-        this.camera.position.z = this.player.position.z - 6.8;
-        this.camera.position.x = this.player.position.x * 0.42;
-        const targetFOV = 65 + (this.speed / this.maxSpeed) * 14;
+        // Camera Follow & Dynamic Speed FOV Warp (Image 2 Perspective)
+        this.camera.position.z = this.player.position.z - 5.8;
+        this.camera.position.x = this.player.position.x * 0.38;
+        this.camera.position.y = 3.6;
+        this.camera.lookAt(this.player.position.x * 0.2, 2.8, this.player.position.z + 22);
+        const targetFOV = 64 + (this.speed / this.maxSpeed) * 12;
         this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
         this.camera.updateProjectionMatrix();
 
