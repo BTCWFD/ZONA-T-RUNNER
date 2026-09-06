@@ -119,6 +119,100 @@ const DJS = [
             discount: "20% OFF en la puerta",
             venue: "Club Bling Bling - Zona Rosa"
         }
+    },
+    {
+        id: "dj_nunez",
+        name: "DJ NUÑEZ",
+        genre: "Tech House / Groove",
+        bpm: 128,
+        color: "#ff7700",
+        colorHex: 0xff7700,
+        worldColor: 0x140700,
+        groundColor: 0x240e00,
+        neonColor: 0xff8800,
+        synthFreq: 61.74, // B1
+        promo: {
+            title: "DJ NUÑEZ — Groove Session (Baum Club)",
+            code: "NUNEZ15",
+            discount: "15% OFF en Preventa",
+            venue: "Baum Club - Calle 33"
+        }
+    },
+    {
+        id: "dj_tatan",
+        name: "DJ TATAN",
+        genre: "Peak Time Techno",
+        bpm: 134,
+        color: "#00ff88",
+        colorHex: 0x00ff88,
+        worldColor: 0x00140a,
+        groundColor: 0x002613,
+        neonColor: 0x00ff88,
+        avatar: "tatan_avatar.jpg",
+        synthFreq: 51.91, // G#1
+        promo: {
+            title: "DJ TATAN — Residencia Oficial (Club Octava)",
+            code: "TATANOCTAVA",
+            discount: "20% OFF en Cover y Mesa",
+            venue: "Club Octava - Chapinero"
+        }
+    },
+    {
+        id: "dj_molecular",
+        name: "DJ MOLECULAR",
+        genre: "Psy-Techno & Industrial",
+        bpm: 136,
+        color: "#00e5ff",
+        colorHex: 0x00e5ff,
+        worldColor: 0x000e18,
+        groundColor: 0x001c2e,
+        neonColor: 0x00e5ff,
+        avatar: "molecular_avatar.jpg",
+        synthFreq: 46.25, // F#1
+        promo: {
+            title: "MOLECULAR — Quantum Techno Night",
+            code: "MOLECULAR_VIP",
+            discount: "Pase VIP Backstage",
+            venue: "Radio Berlin - Chapinero"
+        }
+    },
+    {
+        id: "dj_sthep",
+        name: "DJ STHEP",
+        genre: "Melodic Techno & Vocal",
+        bpm: 126,
+        color: "#ff007f",
+        colorHex: 0xff007f,
+        worldColor: 0x160010,
+        groundColor: 0x2d0022,
+        neonColor: 0xff007f,
+        isFemale: true,
+        synthFreq: 69.3, // C#2
+        promo: {
+            title: "DJ STHEP — Melodic Horizon Tour",
+            code: "STHEP25",
+            discount: "25% OFF en Boletería",
+            venue: "Kaputt Club - Calle 72"
+        }
+    },
+    {
+        id: "dj_camila_leuro",
+        name: "CAMILA LEURO",
+        genre: "Deep Minimal & Hypnotic",
+        bpm: 124,
+        color: "#a855f7",
+        colorHex: 0xa855f7,
+        worldColor: 0x0e0018,
+        groundColor: 0x1e0033,
+        neonColor: 0xc084fc,
+        isFemale: true,
+        synthFreq: 77.78, // D#2
+        promo: {
+            title: "CAMILA LEURO — Hypnotic Frequencies",
+            code: "CAMILAVIP",
+            discount: "20% OFF + Cóctel de Cortesía",
+            venue: "Vlak - Parque 93"
+        }
     }
 ];
 
@@ -659,8 +753,102 @@ class ZonaTRunnerGame {
             this.player.add(rightArm);
             this.limbs.rightArm = rightArm;
 
+        } else if (this.selectedDJ.isFemale) {
+            // === 🎀 FEMALE DJ CYBER-RUNNER (DJ STHEP & CAMILA LEURO) ===
+            const suitMat = new THREE.MeshStandardMaterial({
+                color: this.selectedDJ.color,
+                roughness: 0.25,
+                metalness: 0.4
+            });
+            const darkLatex = new THREE.MeshStandardMaterial({
+                color: 0x0c0c14,
+                roughness: 0.2,
+                metalness: 0.3
+            });
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0xdfa485,
+                roughness: 0.6
+            });
+            const neonMat = new THREE.MeshBasicMaterial({
+                color: this.selectedDJ.neonColor
+            });
+
+            this.playerMesh = new THREE.Group();
+            this.playerMesh.position.y = 1.35;
+            this.player.add(this.playerMesh);
+
+            // Feminine Torso
+            const torsoGeo = new THREE.CylinderGeometry(0.38, 0.28, 0.65, 16);
+            const torso = new THREE.Mesh(torsoGeo, suitMat);
+            torso.position.y = 0.22;
+            this.playerMesh.add(torso);
+
+            const hipsGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.48, 16);
+            const hips = new THREE.Mesh(hipsGeo, darkLatex);
+            hips.position.y = -0.25;
+            this.playerMesh.add(hips);
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 0.86, 0.02);
+            this.playerMesh.add(head);
+
+            // Cyber Visor in Neon Color
+            const visorGeo = new THREE.BoxGeometry(0.42, 0.12, 0.18);
+            const visor = new THREE.Mesh(visorGeo, neonMat);
+            visor.position.set(0, 0.88, 0.2);
+            this.playerMesh.add(visor);
+
+            // High Cyber Ponytail / Hair
+            const hairGeo = new THREE.SphereGeometry(0.26, 12, 12);
+            const hairTop = new THREE.Mesh(hairGeo, darkLatex);
+            hairTop.position.set(0, 0.9, -0.05);
+            this.playerMesh.add(hairTop);
+
+            const ponytailGeo = new THREE.CylinderGeometry(0.08, 0.04, 0.7, 8);
+            const ponytail = new THREE.Mesh(ponytailGeo, darkLatex);
+            ponytail.position.set(0, 0.6, -0.3);
+            ponytail.rotation.x = 0.35;
+            this.playerMesh.add(ponytail);
+
+            // Glowing Neon Headphones
+            const cupGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.09, 16);
+            const leftCup = new THREE.Mesh(cupGeo, neonMat);
+            leftCup.rotation.z = Math.PI / 2;
+            leftCup.position.set(-0.28, 0.86, 0);
+            this.playerMesh.add(leftCup);
+
+            const rightCup = new THREE.Mesh(cupGeo, neonMat);
+            rightCup.rotation.z = Math.PI / 2;
+            rightCup.position.set(0.28, 0.86, 0);
+            this.playerMesh.add(rightCup);
+
+            // Slim Limbs
+            const legGeo = new THREE.CylinderGeometry(0.13, 0.1, 0.82, 10);
+            const leftLeg = new THREE.Mesh(legGeo, darkLatex);
+            leftLeg.position.set(-0.2, 0.42, 0);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            const rightLeg = new THREE.Mesh(legGeo, darkLatex);
+            rightLeg.position.set(0.2, 0.42, 0);
+            this.player.add(rightLeg);
+            this.limbs.rightLeg = rightLeg;
+
+            const armGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.7, 10);
+            const leftArm = new THREE.Mesh(armGeo, suitMat);
+            leftArm.position.set(-0.52, 1.35, 0);
+            this.player.add(leftArm);
+            this.limbs.leftArm = leftArm;
+
+            const rightArm = new THREE.Mesh(armGeo, suitMat);
+            rightArm.position.set(0.52, 1.35, 0);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+
         } else {
-            // === 🎧 STANDARD DJ CYBER SUIT ===
+            // === 🎧 STANDARD MALE / COLECTIVO DJ CYBER SUIT ===
             const torsoGeo = new THREE.BoxGeometry(0.9, 1.1, 0.5);
             const torsoMat = new THREE.MeshStandardMaterial({
                 color: this.selectedDJ.color,
@@ -680,7 +868,7 @@ class ZonaTRunnerGame {
 
             // DJ Headphones
             const cupGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16);
-            const cupMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const cupMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
             const leftCup = new THREE.Mesh(cupGeo, cupMat);
             leftCup.rotation.z = Math.PI / 2;
             leftCup.position.set(-0.32, 0, 0);
@@ -693,7 +881,7 @@ class ZonaTRunnerGame {
 
             // Visor
             const visorGeo = new THREE.BoxGeometry(0.48, 0.18, 0.15);
-            const visorMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const visorMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
             const visor = new THREE.Mesh(visorGeo, visorMat);
             visor.position.set(0, 0.05, 0.28);
             head.add(visor);
