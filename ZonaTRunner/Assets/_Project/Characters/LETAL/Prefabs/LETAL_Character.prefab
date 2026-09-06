@@ -280,6 +280,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7437231858636137477}
   - component: {fileID: 1894931246832318490}
+  - component: {fileID: 319924384011543364}
+  - component: {fileID: 2144894110748370863}
   m_Layer: 0
   m_Name: LETAL_Character
   m_TagString: Untagged
@@ -327,3 +329,47 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!143 &319924384011543364
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7704186112085244781}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.3
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &2144894110748370863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7704186112085244781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7669940a017015b4591cb92014fb0290, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZonaTRunner.Player.PlayerController
+  laneDistance: 2.5
+  laneChangeSpeed: 15
+  jumpForce: 10
+  gravity: 30
+  slideDuration: 0.7
+  slideColliderHeight: 0.9
+  animator: {fileID: 1894931246832318490}
