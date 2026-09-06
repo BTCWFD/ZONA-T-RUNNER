@@ -81,3 +81,57 @@ El núcleo del modelo de negocio es el concepto **Play-to-Party (Jugar para Rumb
 * **Fase 2 (En Progreso):** Completar el roster oficial de 11 DJs, habilidades activas por personaje ("Drop Ultimate"), telemetría HUD y preview de audio.
 * **Fase 3:** Sistema de tabla de clasificación global (Leaderboard Bogotá), inventario de cupones ("Club Vault") y obstáculos urbanos locales (vallas de policía, bafles Funktion-One).
 * **Fase 4:** Publicación en Google Play Store (APK Android) y alianzas comerciales directas con los primeros 3 clubes de la Zona T y Chapinero.
+
+---
+
+## 7. IN-GAME ADVERTISING FRAMEWORK (PUBLICIDAD NATIVA)
+
+ZONA T RUNNER ofrece un ecosistema publicitario no intrusivo y altamente inmersivo. En lugar de banners molestos o videos obligatorios, la publicidad hace parte de la arquitectura del entorno cyberpunk.
+
+### Espacios Publicitarios Disponibles:
+1. **Mega-Vallas Elevadas (Gantries):** Pantallas LED 3D gigantes que cruzan la avenida de lado a lado. Ideales para anunciar grandes festivales (ej. Baum Festival, Tatacoa) y Main Sponsors (ej. marcas de licores).
+2. **Fachadas de Clubes y Vitrinas:** Texturas dinámicas en los laterales de la calle. Permiten a los clubes aliados mostrar su cartelera del fin de semana (ej. Club Octava, Andrés D.C., Kaputt).
+3. **Product Placement (Power-Ups):** Las marcas de bebidas energéticas o licores pueden patrocinar ítems del juego. Por ejemplo, en lugar del escudo estándar, recoger un "Energy Drink X" otorga invulnerabilidad temporal.
+4. **Banners Interactivos (UI):** Avisos integrados en el HUD al finalizar una carrera ("Set Terminado") que entregan recompensas directas y llevan al usuario a la compra.
+
+Este modelo genera altos niveles de recordación de marca (Brand Recall) y una altísima tasa de clics (CTR) comparada con la publicidad web estándar, al sentirse como recompensas ganadas por el usuario.
+
+---
+
+## 8. GO-TO-MARKET STRATEGY (ESTRATEGIA DE LANZAMIENTO)
+
+La captación de usuarios se basará en la integración directa con la vida nocturna física de Bogotá, creando un bucle viral (Viral Loop) orgánico.
+
+### Tácticas Clave:
+* **"Gaming Stations" en Clubes (BTL):** Instalación de iPads o máquinas arcade en las zonas VIP de clubes aliados. Quien logre el "High Score" de la noche, se lleva una botella gratis. 
+* **Códigos QR Dinámicos:** Proyección de códigos QR gigantes en las pantallas LED de los clubes durante los sets de los DJs (Nuñez, Letal, Tatán, etc.) invitando al público a descargar el juego para obtener beneficios para la siguiente fiesta.
+* **Torneos "Road to Festival":** Competiciones semanales donde los mejores corredores ganan entradas VIP para los principales festivales de electrónica de la ciudad.
+* **Apoyo de Influencers y DJs:** Los 11 DJs del juego actuarán como micro-influencers, promoviendo el juego en sus redes sociales, ya que tienen un incentivo financiero directo (Revenue Share) por las ventas in-game generadas por su avatar.
+
+---
+
+## 9. FICHA TÉCNICA DE DJs Y TOKENS (TOKENOMICS BASE)
+
+ZONA T RUNNER utiliza un sistema económico híbrido diseñado para mantener la retención diaria y facilitar transacciones sin fricción.
+
+### "Tokens Zona T" (Moneda Soft In-Game):
+* **Obtención:** Recolectando monedas de oro virtuales durante la carrera.
+* **Uso:** Desbloqueo de atuendos alternativos (Skins), mejoras temporales (más tiempo de imán, mayor duración del escudo) y tickets de reintento.
+
+### Pases VIP (Moneda Premium / IAP):
+* Comprados con dinero real (FIAT) a través de las tiendas de aplicaciones.
+* Usados para desbloquear DJs legendarios, efectos visuales premium (estelas de neón personalizadas) y pases de batalla estacionales (Clubber Pass).
+
+### Roster Oficial y Atributos:
+Cada DJ tiene un arquetipo basado en su estilo de música y personalidad real:
+* **DJ Nuñez ("El Toro en Llamas"):** 
+  * *Género:* Tech House.
+  * *Habilidad Pasiva:* 1-2-3-4 Stomp (Rompe obstáculos menores al caer tras un salto en el 4to beat).
+* **DJ Letal:** 
+  * *Género:* Techno.
+  * *Habilidad Pasiva:* Violín Neón (Mayor radio de atracción de tokens).
+* **DJ Tatán:** 
+  * *Género:* Progressive House.
+  * *Habilidad Pasiva:* Resistencia (Mayor escudo inicial).
+* **DJ Molecular & DJ Sthep (Próximos lanzamientos)**
+

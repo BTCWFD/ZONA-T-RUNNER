@@ -1903,6 +1903,12 @@ class ZonaTRunnerGame {
     }
 
     startRun() {
+        document.body.classList.add("glitch-flash");
+        setTimeout(() => {
+            document.body.classList.remove("glitch-flash");
+        }, 300);
+        
+        this.shakeTime = 0; // Initialize screen shake
         this.isPlaying = true;
         this.isPaused = false;
         this.score = 0;
@@ -1996,8 +2002,12 @@ class ZonaTRunnerGame {
         // Distance & Acceleration
         this.distance += this.speed * dt;
         this.score += this.speed * dt * 1.5 * multiplier;
+        
+        // Dynamic Difficulty: increase max speed as distance grows
+        this.maxSpeed = 52 + (this.distance / 1000); 
+
         if (this.speed < this.maxSpeed) {
-            this.speed += 0.28 * dt;
+            this.speed += 0.35 * dt; // Faster acceleration
         }
 
         // Live Speedometer Telemetry (EXXO Runner Style)
@@ -2069,10 +2079,26 @@ class ZonaTRunnerGame {
             }
         }
 
+        // Animated Obstacles (Subwoofers pulse)
+        this.obstacles.forEach(obs => {
+            if (obs.type === "low") {
+                const pulse = 1.0 + Math.sin(this.runAnimTime * 4.0) * 0.15;
+                obs.mesh.scale.set(pulse, pulse, pulse);
+            }
+        });
+
         // Camera Follow & Dynamic Speed FOV Warp (Image 2 Perspective)
         this.camera.position.z = this.player.position.z - 5.8;
         this.camera.position.x = this.player.position.x * 0.38;
         this.camera.position.y = 3.6;
+
+        // Screen Shake
+        if (this.shakeTime > 0) {
+            this.shakeTime -= dt;
+            const amt = this.shakeTime * 1.5;
+            this.camera.position.x += (Math.random() - 0.5) * amt;
+            this.camera.position.y += (Math.random() - 0.5) * amt;
+        }
         this.camera.lookAt(this.player.position.x * 0.2, 2.8, this.player.position.z + 22);
         const targetFOV = 64 + (this.speed / this.maxSpeed) * 12;
         this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
@@ -2192,10 +2218,12 @@ class ZonaTRunnerGame {
                     this.scene.remove(obs.mesh);
                     this.obstacles.splice(i, 1);
                     this.audio.playShieldBreakSound();
+                    this.shakeTime = 0.4;
                     return;
                 }
 
                 // Crash & Game Over
+                this.shakeTime = 0.8;
                 this.gameOver();
                 return;
             }
