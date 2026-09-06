@@ -444,6 +444,8 @@ class ZonaTRunnerGame {
         cardEl.classList.add("selected");
         document.getElementById("hud-dj-name").innerText = dj.name;
         document.getElementById("hud-dj-name").style.color = dj.color;
+        const bpmTag = document.getElementById("hud-bpm-tag");
+        if (bpmTag) bpmTag.innerText = `BEAT ${dj.bpm} BPM`;
         this.applyDJTheme();
     }
 
@@ -452,8 +454,13 @@ class ZonaTRunnerGame {
         this.scene.background = new THREE.Color(this.selectedDJ.worldColor);
         this.scene.fog = new THREE.FogExp2(this.selectedDJ.worldColor, 0.014);
 
-        if (this.playerMesh) {
-            this.playerMesh.material.color.set(this.selectedDJ.color);
+        if (this.player) {
+            const posX = this.player.position.x;
+            const posY = this.player.position.y;
+            const posZ = this.player.position.z;
+            this.scene.remove(this.player);
+            this.buildPlayerCharacter();
+            this.player.position.set(posX, posY, posZ);
         }
     }
 
@@ -500,73 +507,221 @@ class ZonaTRunnerGame {
 
     buildPlayerCharacter() {
         this.player = new THREE.Group();
+        this.limbs = {};
 
-        // Torso
-        const torsoGeo = new THREE.BoxGeometry(0.9, 1.1, 0.5);
-        const torsoMat = new THREE.MeshStandardMaterial({
-            color: this.selectedDJ.color,
-            roughness: 0.3,
-            metalness: 0.5
-        });
-        this.playerMesh = new THREE.Mesh(torsoGeo, torsoMat);
-        this.playerMesh.position.y = 1.35;
-        this.player.add(this.playerMesh);
+        if (this.selectedDJ.id === "dj_letal") {
+            // === 🐱 DJ LETAL: 3D CATWOMAN AVATAR WITH ELECTRIC NEON VIOLIN ===
+            const latexMat = new THREE.MeshStandardMaterial({
+                color: 0x090910,
+                roughness: 0.12,
+                metalness: 0.45
+            });
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0xdca183,
+                roughness: 0.6,
+                metalness: 0.05
+            });
+            const hairMat = new THREE.MeshStandardMaterial({
+                color: 0x3d1b10,
+                roughness: 0.7
+            });
+            const purpleNeonMat = new THREE.MeshBasicMaterial({
+                color: 0xd400ff
+            });
 
-        // Head
-        const headGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.8 });
-        const head = new THREE.Mesh(headGeo, headMat);
-        head.position.set(0, 0.95, 0);
-        this.playerMesh.add(head);
+            // Torso root container
+            this.playerMesh = new THREE.Group();
+            this.playerMesh.position.y = 1.35;
+            this.player.add(this.playerMesh);
 
-        // DJ Headphones (Cup left & right + band)
-        const cupGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16);
-        const cupMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-        const leftCup = new THREE.Mesh(cupGeo, cupMat);
-        leftCup.rotation.z = Math.PI / 2;
-        leftCup.position.set(-0.32, 0, 0);
-        head.add(leftCup);
+            // 1. Upper Torso (Form-fitting black latex suit)
+            const bustGeo = new THREE.CylinderGeometry(0.44, 0.32, 0.62, 16);
+            const bust = new THREE.Mesh(bustGeo, latexMat);
+            bust.position.y = 0.25;
+            this.playerMesh.add(bust);
 
-        const rightCup = new THREE.Mesh(cupGeo, cupMat);
-        rightCup.rotation.z = Math.PI / 2;
-        rightCup.position.set(0.32, 0, 0);
-        head.add(rightCup);
+            // Neckline accent
+            const neckAccentGeo = new THREE.BoxGeometry(0.18, 0.2, 0.46);
+            const neckAccent = new THREE.Mesh(neckAccentGeo, skinMat);
+            neckAccent.position.set(0, 0.45, 0.05);
+            this.playerMesh.add(neckAccent);
 
-        // Visor
-        const visorGeo = new THREE.BoxGeometry(0.48, 0.18, 0.15);
-        const visorMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-        const visor = new THREE.Mesh(visorGeo, visorMat);
-        visor.position.set(0, 0.05, 0.28);
-        head.add(visor);
+            // Choker collar with silver zip
+            const chokerGeo = new THREE.TorusGeometry(0.16, 0.03, 8, 16);
+            const choker = new THREE.Mesh(chokerGeo, purpleNeonMat);
+            choker.rotation.x = Math.PI / 2;
+            choker.position.set(0, 0.62, 0);
+            this.playerMesh.add(choker);
 
-        // Limbs for running animation
-        const limbMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.5 });
+            // 2. Waist & Hips
+            const hipGeo = new THREE.CylinderGeometry(0.31, 0.42, 0.5, 16);
+            const hips = new THREE.Mesh(hipGeo, latexMat);
+            hips.position.y = -0.26;
+            this.playerMesh.add(hips);
 
-        // Left Leg
-        const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
-        const leftLeg = new THREE.Mesh(legGeo, limbMat);
-        leftLeg.position.set(-0.25, 0.4, 0);
-        this.player.add(leftLeg);
-        this.limbs.leftLeg = leftLeg;
+            // 3. Head & Face (Unmasked confident look)
+            const headGeo = new THREE.SphereGeometry(0.24, 18, 18);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 0.88, 0.02);
+            this.playerMesh.add(head);
 
-        // Right Leg
-        const rightLeg = new THREE.Mesh(legGeo, limbMat);
-        rightLeg.position.set(0.25, 0.4, 0);
-        this.player.add(rightLeg);
-        this.limbs.rightLeg = rightLeg;
+            // 4. Long Auburn Hair
+            const hairTopGeo = new THREE.SphereGeometry(0.26, 16, 16);
+            const hairTop = new THREE.Mesh(hairTopGeo, hairMat);
+            hairTop.position.set(0, 0.92, -0.05);
+            this.playerMesh.add(hairTop);
 
-        // Left Arm
-        const armGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
-        const leftArm = new THREE.Mesh(armGeo, limbMat);
-        leftArm.position.set(-0.62, 1.35, 0);
-        this.player.add(leftArm);
-        this.limbs.leftArm = leftArm;
+            // Hair back cascade
+            const hairBackGeo = new THREE.BoxGeometry(0.34, 0.72, 0.2);
+            const hairBack = new THREE.Mesh(hairBackGeo, hairMat);
+            hairBack.position.set(0, 0.58, -0.22);
+            hairBack.rotation.x = 0.15;
+            this.playerMesh.add(hairBack);
 
-        // Right Arm
-        const rightArm = new THREE.Mesh(armGeo, limbMat);
-        rightArm.position.set(0.62, 1.35, 0);
-        this.player.add(rightArm);
-        this.limbs.rightArm = rightArm;
+            // 5. Cat Ears Headband
+            const earGeo = new THREE.ConeGeometry(0.09, 0.2, 4);
+            const earL = new THREE.Mesh(earGeo, latexMat);
+            earL.position.set(-0.14, 1.15, -0.02);
+            earL.rotation.z = 0.22;
+            this.playerMesh.add(earL);
+
+            const earInnerL = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 4), purpleNeonMat);
+            earInnerL.position.set(-0.14, 1.14, 0.01);
+            earInnerL.rotation.z = 0.22;
+            this.playerMesh.add(earInnerL);
+
+            const earR = new THREE.Mesh(earGeo, latexMat);
+            earR.position.set(0.14, 1.15, -0.02);
+            earR.rotation.z = -0.22;
+            this.playerMesh.add(earR);
+
+            const earInnerR = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 4), purpleNeonMat);
+            earInnerR.position.set(0.14, 1.14, 0.01);
+            earInnerR.rotation.z = -0.22;
+            this.playerMesh.add(earInnerR);
+
+            // 6. 🎻 SIGNATURE ELECTRIC NEON VIOLIN (Mounted on shoulder/back)
+            const violinGroup = new THREE.Group();
+            violinGroup.position.set(0.48, 0.25, -0.2);
+            violinGroup.rotation.set(0.2, -0.3, 0.45);
+
+            // Violin body
+            const violinBodyGeo = new THREE.BoxGeometry(0.24, 0.6, 0.09);
+            const violinBodyMat = new THREE.MeshStandardMaterial({
+                color: 0x3a0066,
+                roughness: 0.2,
+                metalness: 0.7,
+                emissive: 0x7700cc,
+                emissiveIntensity: 0.5
+            });
+            const violinBody = new THREE.Mesh(violinBodyGeo, violinBodyMat);
+            violinGroup.add(violinBody);
+
+            // Glowing Violin Neck
+            const vNeckGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.45, 8);
+            const vNeck = new THREE.Mesh(vNeckGeo, purpleNeonMat);
+            vNeck.position.set(0, 0.45, 0);
+            violinGroup.add(vNeck);
+
+            // Glowing Strings
+            const stringGeo = new THREE.PlaneGeometry(0.08, 0.55);
+            const strings = new THREE.Mesh(stringGeo, purpleNeonMat);
+            strings.position.set(0, 0.1, 0.06);
+            violinGroup.add(strings);
+
+            // Dynamic PointLight casting violet glow
+            const violinLight = new THREE.PointLight(0xd400ff, 1.4, 4.5);
+            violinLight.position.set(0, 0.1, 0.3);
+            violinGroup.add(violinLight);
+
+            this.playerMesh.add(violinGroup);
+
+            // 7. Latex Limbs
+            const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.85, 12);
+            const leftLeg = new THREE.Mesh(legGeo, latexMat);
+            leftLeg.position.set(-0.2, 0.42, 0);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            const rightLeg = new THREE.Mesh(legGeo, latexMat);
+            rightLeg.position.set(0.2, 0.42, 0);
+            this.player.add(rightLeg);
+            this.limbs.rightLeg = rightLeg;
+
+            const armGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.72, 12);
+            const leftArm = new THREE.Mesh(armGeo, latexMat);
+            leftArm.position.set(-0.52, 1.35, 0);
+            this.player.add(leftArm);
+            this.limbs.leftArm = leftArm;
+
+            const rightArm = new THREE.Mesh(armGeo, latexMat);
+            rightArm.position.set(0.52, 1.35, 0);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+
+        } else {
+            // === 🎧 STANDARD DJ CYBER SUIT ===
+            const torsoGeo = new THREE.BoxGeometry(0.9, 1.1, 0.5);
+            const torsoMat = new THREE.MeshStandardMaterial({
+                color: this.selectedDJ.color,
+                roughness: 0.3,
+                metalness: 0.5
+            });
+            this.playerMesh = new THREE.Mesh(torsoGeo, torsoMat);
+            this.playerMesh.position.y = 1.35;
+            this.player.add(this.playerMesh);
+
+            // Head
+            const headGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.8 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.set(0, 0.95, 0);
+            this.playerMesh.add(head);
+
+            // DJ Headphones
+            const cupGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16);
+            const cupMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const leftCup = new THREE.Mesh(cupGeo, cupMat);
+            leftCup.rotation.z = Math.PI / 2;
+            leftCup.position.set(-0.32, 0, 0);
+            head.add(leftCup);
+
+            const rightCup = new THREE.Mesh(cupGeo, cupMat);
+            rightCup.rotation.z = Math.PI / 2;
+            rightCup.position.set(0.32, 0, 0);
+            head.add(rightCup);
+
+            // Visor
+            const visorGeo = new THREE.BoxGeometry(0.48, 0.18, 0.15);
+            const visorMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const visor = new THREE.Mesh(visorGeo, visorMat);
+            visor.position.set(0, 0.05, 0.28);
+            head.add(visor);
+
+            // Limbs
+            const limbMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.5 });
+            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
+            const leftLeg = new THREE.Mesh(legGeo, limbMat);
+            leftLeg.position.set(-0.25, 0.4, 0);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            const rightLeg = new THREE.Mesh(legGeo, limbMat);
+            rightLeg.position.set(0.25, 0.4, 0);
+            this.player.add(rightLeg);
+            this.limbs.rightLeg = rightLeg;
+
+            const armGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
+            const leftArm = new THREE.Mesh(armGeo, limbMat);
+            leftArm.position.set(-0.62, 1.35, 0);
+            this.player.add(leftArm);
+            this.limbs.leftArm = leftArm;
+
+            const rightArm = new THREE.Mesh(armGeo, limbMat);
+            rightArm.position.set(0.62, 1.35, 0);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+        }
 
         // Shield Bubble Visualizer
         const shieldGeo = new THREE.SphereGeometry(1.6, 24, 24);
@@ -851,6 +1006,13 @@ class ZonaTRunnerGame {
             this.speed += 0.28 * dt;
         }
 
+        // Live Speedometer Telemetry (EXXO Runner Style)
+        const speedKmH = Math.round(this.speed * 3.6);
+        const speedEl = document.getElementById("hud-speed");
+        if (speedEl) {
+            speedEl.innerHTML = `${speedKmH} <span style="font-size: 0.7rem; color: #8890a6;">KM/H</span>`;
+        }
+
         // Forward motion
         this.player.position.z += this.speed * dt;
 
@@ -859,8 +1021,10 @@ class ZonaTRunnerGame {
             this.rainParticles.position.z = this.player.position.z;
         }
 
-        // Smooth Lane Swapping
+        // Smooth Lane Swapping & Dynamic Lean (EXXO Runner banking physics)
         this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, this.targetLaneX, 17 * dt);
+        const laneOffset = this.targetLaneX - this.player.position.x;
+        this.player.rotation.z = THREE.MathUtils.lerp(this.player.rotation.z, -laneOffset * 0.14, 14 * dt);
 
         // Jump Physics
         if (this.isJumping) {
@@ -886,20 +1050,23 @@ class ZonaTRunnerGame {
         if (!this.isJumping && !this.isSliding) {
             this.runAnimTime += dt * this.speed * 0.7;
             const legAngle = Math.sin(this.runAnimTime) * 0.75;
-            this.limbs.leftLeg.rotation.x = legAngle;
-            this.limbs.rightLeg.rotation.x = -legAngle;
-            this.limbs.leftArm.rotation.x = -legAngle * 0.8;
-            this.limbs.rightArm.rotation.x = legAngle * 0.8;
+            if (this.limbs.leftLeg) this.limbs.leftLeg.rotation.x = legAngle;
+            if (this.limbs.rightLeg) this.limbs.rightLeg.rotation.x = -legAngle;
+            if (this.limbs.leftArm) this.limbs.leftArm.rotation.x = -legAngle * 0.8;
+            if (this.limbs.rightArm) this.limbs.rightArm.rotation.x = legAngle * 0.8;
         } else if (this.isJumping) {
-            this.limbs.leftLeg.rotation.x = 0.4;
-            this.limbs.rightLeg.rotation.x = 0.4;
-            this.limbs.leftArm.rotation.x = -1.2;
-            this.limbs.rightArm.rotation.x = -1.2;
+            if (this.limbs.leftLeg) this.limbs.leftLeg.rotation.x = 0.4;
+            if (this.limbs.rightLeg) this.limbs.rightLeg.rotation.x = 0.4;
+            if (this.limbs.leftArm) this.limbs.leftArm.rotation.x = -1.2;
+            if (this.limbs.rightArm) this.limbs.rightArm.rotation.x = -1.2;
         }
 
-        // Camera Follow
+        // Camera Follow & Dynamic Speed FOV Warp (EXXO Runner camera logic)
         this.camera.position.z = this.player.position.z - 6.8;
         this.camera.position.x = this.player.position.x * 0.42;
+        const targetFOV = 65 + (this.speed / this.maxSpeed) * 14;
+        this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
+        this.camera.updateProjectionMatrix();
 
         // Magnet attraction & Coin Rotation
         const pz = this.player.position.z;
