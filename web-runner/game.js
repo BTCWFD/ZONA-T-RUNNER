@@ -474,7 +474,7 @@ class ZonaTRunnerGame {
         this.limbs = {};
         this.runAnimTime = 0;
 
-        // Procedural Elements
+        // Procedural Elements & Billboards
         this.groundSegments = [];
         this.obstacles = [];
         this.collectibles = [];
@@ -482,6 +482,18 @@ class ZonaTRunnerGame {
         this.rainParticles = null;
         this.billboards = [];
         this.lastSpawnZ = -10;
+
+        // Texture Loader for Real Zona T Billboards
+        this.textureLoader = new THREE.TextureLoader();
+        this.billboardTextures = [
+            this.textureLoader.load("assets/billboards/valla_baum.jpg"),
+            this.textureLoader.load("assets/billboards/valla_octava.jpg"),
+            this.textureLoader.load("assets/billboards/valla_andino.jpg"),
+            this.textureLoader.load("assets/billboards/valla_andresdc.jpg"),
+            this.textureLoader.load("assets/billboards/valla_redbull.jpg"),
+            this.textureLoader.load("assets/billboards/valla_zonat_pass.jpg")
+        ];
+        this.billboardCycle = 0;
 
         // Input
         this.touchStartX = 0;
@@ -1089,53 +1101,219 @@ class ZonaTRunnerGame {
         const segment = new THREE.Group();
         segment.position.z = this.lastSpawnZ;
 
-        // Asphalt Track
-        const roadGeo = new THREE.PlaneGeometry(12, segLen);
+
+        // 1. Bogotá Zona T Wet Asphalt Roadway
+        const roadGeo = new THREE.PlaneGeometry(11.2, segLen);
         const roadMat = new THREE.MeshStandardMaterial({
-            color: this.selectedDJ.groundColor,
-            roughness: 0.75,
-            metalness: 0.2
+            color: this.selectedDJ.groundColor || 0x120a1b,
+            roughness: 0.45,
+            metalness: 0.35
         });
         const road = new THREE.Mesh(roadGeo, roadMat);
         road.rotation.x = -Math.PI / 2;
         road.position.z = segLen / 2;
         segment.add(road);
 
-        // Neon Lane Dividers
+        // Neon Lane Divider Stripes
         [-this.laneDistance / 2, this.laneDistance / 2].forEach(x => {
             const lineGeo = new THREE.PlaneGeometry(0.18, segLen);
-            const lineMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor });
+            const lineMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
             const line = new THREE.Mesh(lineGeo, lineMat);
             line.rotation.x = -Math.PI / 2;
             line.position.set(x, 0.02, segLen / 2);
             segment.add(line);
         });
 
-        // Lateral club facade / buildings with windows
-        [-7.2, 7.2].forEach(x => {
-            const wallGeo = new THREE.BoxGeometry(1.8, 7.5, segLen);
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0x06060c, roughness: 0.95 });
-            const wall = new THREE.Mesh(wallGeo, wallMat);
-            wall.position.set(x, 3.75, segLen / 2);
-            segment.add(wall);
+        // 2. Zona T Sidewalks (Andenes de Adoquín Bogotano con Bolardos)
+        const paverMat = new THREE.MeshStandardMaterial({ color: 0x24242d, roughness: 0.85 });
+        const curbMat = new THREE.MeshStandardMaterial({ color: 0x3d3d4a, roughness: 0.6 });
+        const bollardMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.7, roughness: 0.3 });
 
-            // Architectural glowing strip
-            const stripGeo = new THREE.BoxGeometry(0.25, 0.25, segLen);
-            const stripMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor });
-            const strip = new THREE.Mesh(stripGeo, stripMat);
-            strip.position.set(x > 0 ? x - 0.9 : x + 0.9, 6.2, segLen / 2);
-            segment.add(strip);
+        [-7.8, 7.8].forEach(sideX => {
+            // Sidewalk Pavers
+            const swGeo = new THREE.BoxGeometry(4.4, 0.22, segLen);
+            const sidewalk = new THREE.Mesh(swGeo, paverMat);
+            sidewalk.position.set(sideX, 0.11, segLen / 2);
+            segment.add(sidewalk);
+
+            // Curb Border
+            const curbEdgeX = sideX > 0 ? 5.55 : -5.55;
+            const curbGeo = new THREE.BoxGeometry(0.3, 0.26, segLen);
+            const curb = new THREE.Mesh(curbGeo, curbMat);
+            curb.position.set(curbEdgeX, 0.13, segLen / 2);
+            segment.add(curb);
+
+            // Typical Bogotá Security Bollards (Bolardos cilíndricos negros de la 82)
+            for (let bz = 4; bz < segLen; bz += 7) {
+                const bGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.75, 10);
+                const bollard = new THREE.Mesh(bGeo, bollardMat);
+                const bx = sideX > 0 ? 5.85 : -5.85;
+                bollard.position.set(bx, 0.45, bz);
+                segment.add(bollard);
+            }
+
+            // Bogotá Curved Streetlamp
+            const lampPoleGeo = new THREE.CylinderGeometry(0.08, 0.08, 5.2, 8);
+            const lampPole = new THREE.Mesh(lampPoleGeo, bollardMat);
+            const lampX = sideX > 0 ? 7.2 : -7.2;
+            lampPole.position.set(lampX, 2.6, segLen * 0.5);
+            segment.add(lampPole);
+
+            const lampHeadGeo = new THREE.BoxGeometry(0.6, 0.15, 0.4);
+            const lampHeadMat = new THREE.MeshBasicMaterial({ color: 0xffeedd });
+            const lampHead = new THREE.Mesh(lampHeadGeo, lampHeadMat);
+            lampHead.position.set(sideX > 0 ? lampX - 0.3 : lampX + 0.3, 5.1, segLen * 0.5);
+            segment.add(lampHead);
         });
 
-        // Floating Event Billboards (Native advertising)
-        if (!isSafe && Math.random() > 0.6) {
-            const billboardGeo = new THREE.BoxGeometry(8, 2.4, 0.4);
-            const billboardMat = new THREE.MeshBasicMaterial({
-                color: Math.random() > 0.5 ? this.selectedDJ.neonColor : 0x00ffff
+        // 3. Zona T Commercial & Nightclub Architecture (Calle 82 / Andino Style)
+        const brickMat = new THREE.MeshStandardMaterial({ color: 0x7c3522, roughness: 0.88 }); // Ladrillo Bogotano
+        const darkGlassMat = new THREE.MeshStandardMaterial({ color: 0x0c1622, metalness: 0.85, roughness: 0.15 });
+        const clubNames = ["CLUB OCTAVA", "ANDRÉS D.C.", "BAUM CLUB", "BLING BLING", "KAPUTT", "VLAK", "RADIO BERLIN"];
+
+        [-13.8, 13.8].forEach((bldgX, idx) => {
+            const bHeight = 16 + (Math.sin(this.lastSpawnZ * 0.05 + idx) * 5 + 5); // 16m to 26m
+            const bldgGroup = new THREE.Group();
+            bldgGroup.position.set(bldgX, bHeight / 2, segLen / 2);
+
+            // Brick Main Body
+            const bodyGeo = new THREE.BoxGeometry(7.6, bHeight, segLen);
+            const body = new THREE.Mesh(bodyGeo, brickMat);
+            bldgGroup.add(body);
+
+            // Reflective Glass Window Strips (Pisos superiores)
+            for (let fy = 4; fy < bHeight - 2; fy += 3.2) {
+                const winGeo = new THREE.BoxGeometry(0.2, 1.6, segLen - 3);
+                const win = new THREE.Mesh(winGeo, darkGlassMat);
+                win.position.set(bldgX > 0 ? -3.72 : 3.72, fy - (bHeight / 2), 0);
+                bldgGroup.add(win);
+            }
+
+            // Ground Floor: Club & Boutique Storefront Entrance
+            const clubName = clubNames[(Math.floor(Math.abs(this.lastSpawnZ) / segLen) + idx) % clubNames.length];
+            const canopyGeo = new THREE.BoxGeometry(3.6, 0.35, 6.5);
+            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x111118, metalness: 0.7 });
+            const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+            canopy.position.set(bldgX > 0 ? -4.8 : 4.8, 3.4 - (bHeight / 2), 0);
+            bldgGroup.add(canopy);
+
+            // Glowing Neon Club Sign under canopy
+            const neonSignGeo = new THREE.BoxGeometry(0.15, 0.65, 4.8);
+            const neonSignMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
+            const neonSign = new THREE.Mesh(neonSignGeo, neonSignMat);
+            neonSign.position.set(bldgX > 0 ? -4.9 : 4.9, 3.8 - (bHeight / 2), 0);
+            bldgGroup.add(neonSign);
+
+            // Rooftop Antennas / Towers with Red Aviation Beacons
+            const antennaGeo = new THREE.CylinderGeometry(0.06, 0.06, 4.5, 6);
+            const antenna = new THREE.Mesh(antennaGeo, bollardMat);
+            antenna.position.set(0, (bHeight / 2) + 2.25, (idx === 0 ? -6 : 6));
+            bldgGroup.add(antenna);
+
+            const beaconGeo = new THREE.SphereGeometry(0.18, 8, 8);
+            const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff0033 });
+            const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+            beacon.position.set(0, (bHeight / 2) + 4.5, (idx === 0 ? -6 : 6));
+            bldgGroup.add(beacon);
+
+            segment.add(bldgGroup);
+        });
+
+        // 4. 🏙️ REAL ZONA T 3D LED BILLBOARDS (Native Digital Advertising)
+        const segIndex = Math.floor(Math.abs(this.lastSpawnZ) / segLen);
+
+        // VALLA TIPO 1: Puente Pasarela Aéreo LED (Cruza toda la calle de la Zona T)
+        if (segIndex % 3 === 0 && this.billboardTextures && this.billboardTextures.length > 0) {
+            const billboardGroup = new THREE.Group();
+            billboardGroup.position.set(0, 0, segLen * 0.5);
+
+            // Steel Space-Frame Support Pylons (Left & Right)
+            [-6.4, 6.4].forEach(px => {
+                const pylonGeo = new THREE.BoxGeometry(0.5, 7.8, 0.5);
+                const pylon = new THREE.Mesh(pylonGeo, bollardMat);
+                pylon.position.set(px, 3.9, 0);
+                billboardGroup.add(pylon);
             });
-            const billboard = new THREE.Mesh(billboardGeo, billboardMat);
-            billboard.position.set(0, 6.2, segLen * 0.5);
-            segment.add(billboard);
+
+            // Overhead Horizontal Steel Truss
+            const trussGeo = new THREE.BoxGeometry(13.2, 0.5, 0.5);
+            const truss = new THREE.Mesh(trussGeo, bollardMat);
+            truss.position.set(0, 7.6, 0);
+            billboardGroup.add(truss);
+
+            // Monumental LED Display Screen Box
+            const screenFrameGeo = new THREE.BoxGeometry(9.4, 3.6, 0.4);
+            const screenFrameMat = new THREE.MeshStandardMaterial({ color: 0x08080f, metalness: 0.8, roughness: 0.2 });
+            const screenFrame = new THREE.Mesh(screenFrameGeo, screenFrameMat);
+            screenFrame.position.set(0, 6.4, 0);
+            billboardGroup.add(screenFrame);
+
+            // Front High-Res Digital Display Surface (Faces oncoming player)
+            const currentTex = this.billboardTextures[this.billboardCycle % this.billboardTextures.length];
+            this.billboardCycle++;
+
+            const screenFaceGeo = new THREE.PlaneGeometry(9.0, 3.2);
+            const screenFaceMat = new THREE.MeshBasicMaterial({
+                map: currentTex,
+                color: 0xffffff,
+                side: THREE.DoubleSide
+            });
+            const screenFace = new THREE.Mesh(screenFaceGeo, screenFaceMat);
+            screenFace.position.set(0, 6.4, -0.22);
+            screenFace.rotation.y = Math.PI; // Faces toward camera (coming from -Z to +Z)
+            billboardGroup.add(screenFace);
+
+            // Glowing Neon Bezel Trims (Top & Bottom of screen)
+            [-1.7, 1.7].forEach(ny => {
+                const trimGeo = new THREE.BoxGeometry(9.4, 0.08, 0.45);
+                const trimMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+                const trim = new THREE.Mesh(trimGeo, trimMat);
+                trim.position.set(0, 6.4 + ny, 0);
+                billboardGroup.add(trim);
+            });
+
+            // Ambient downward billboard spotlight
+            const bbLight = new THREE.PointLight(0x00e5ff, 1.2, 8);
+            bbLight.position.set(0, 4.6, 0);
+            billboardGroup.add(bbLight);
+
+            segment.add(billboardGroup);
+        }
+        // VALLA TIPO 2: Tótem Publicitario LED en la Acera (Mupi Bogotano)
+        else if (segIndex % 3 === 1 && this.billboardTextures && this.billboardTextures.length > 0) {
+            const totemGroup = new THREE.Group();
+            const totemSideX = (segIndex % 2 === 0) ? -6.2 : 6.2;
+            totemGroup.position.set(totemSideX, 0, segLen * 0.45);
+
+            // Black Metal Totem Frame
+            const frameGeo = new THREE.BoxGeometry(1.6, 3.4, 0.35);
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0x0d0d14, metalness: 0.8 });
+            const frame = new THREE.Mesh(frameGeo, frameMat);
+            frame.position.y = 1.7;
+            totemGroup.add(frame);
+
+            // Double Sided Illuminated Poster
+            const posterTex = this.billboardTextures[this.billboardCycle % this.billboardTextures.length];
+            this.billboardCycle++;
+
+            const posterGeo = new THREE.PlaneGeometry(1.4, 2.9);
+            const posterMat = new THREE.MeshBasicMaterial({ 
+                map: posterTex,
+                side: THREE.DoubleSide
+            });
+            const poster = new THREE.Mesh(posterGeo, posterMat);
+            poster.position.set(0, 1.7, -0.19);
+            poster.rotation.y = Math.PI;
+            totemGroup.add(poster);
+
+            // Neon Halo Top Cap
+            const capGeo = new THREE.BoxGeometry(1.65, 0.1, 0.4);
+            const capMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.y = 3.42;
+            totemGroup.add(cap);
+
+            segment.add(totemGroup);
         }
 
         this.scene.add(segment);
