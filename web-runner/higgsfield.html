@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higgsfield AI — Generador de Animaciones ZONA T</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #070913; color: #fff; padding: 30px 20px 80px 20px; }
+        .header { text-align: center; margin-bottom: 35px; }
+        .title { font-size: 2.3rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #a855f7; text-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
+        .subtitle { font-size: 1rem; color: #94a3b8; margin-top: 8px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px; }
+        .card { background: #0e1224; border: 1px solid #232b45; border-radius: 16px; padding: 26px; box-shadow: 0 12px 35px rgba(0,0,0,0.6); position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .dj-title { font-size: 1.35rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .badge { font-size: 0.75rem; padding: 5px 12px; border-radius: 20px; font-weight: 800; text-transform: uppercase; }
+        .badge-purple { background: #9333ea; color: #fff; }
+        .badge-orange { background: #ea580c; color: #fff; }
+
+        .video-box { width: 100%; height: 260px; border-radius: 12px; overflow: hidden; background: #04060c; border: 1px solid #1e293b; margin-bottom: 18px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .video-canvas { width: 100%; height: 100%; object-fit: cover; }
+        .video-overlay { position: absolute; bottom: 10px; left: 14px; background: rgba(0,0,0,0.7); padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; color: #00f3ff; font-family: monospace; }
+
+        .prompt-title { font-size: 0.85rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .prompt-text { background: #05070e; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; font-family: monospace; font-size: 0.82rem; color: #a5b4fc; line-height: 1.55; margin-bottom: 16px; user-select: all; }
+        
+        .action-row { display: flex; gap: 12px; }
+        .btn-copy { flex: 1; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-copy:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .btn-higgsfield { background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .btn-higgsfield:hover { opacity: 0.92; transform: translateY(-2px); }
+
+        .specs { margin-top: 16px; padding-top: 14px; border-top: 1px solid #1e293b; display: flex; justify-content: space-between; font-size: 0.82rem; color: #64748b; }
+        .specs span { color: #f8fafc; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="title">⚡ GENERADOR DE ANIMACIONES — HIGGSFIELD AI</h1>
+        <p class="subtitle">Pipelines de generación de bucles de animación a 60 FPS para DJ Letal y DJ Núñez</p>
+    </div>
+
+    <div class="container">
+        <!-- DJ LETAL -->
+        <div class="card">
+            <div class="card-header">
+                <div class="dj-title">💜 DJ LETAL <span style="font-size:0.9rem; color:#c084fc;">(Violin Techno Runner)</span></div>
+                <span class="badge badge-purple">MOTION 7 &bull; 60 FPS</span>
+            </div>
+
+            <div class="video-box">
+                <!-- Simulación procedural de previsualización animada -->
+                <canvas id="canvas-letal" class="video-canvas"></canvas>
+                <div class="video-overlay">● PREVIEW ANIMACIÓN CÍCLICA 60FPS</div>
+            </div>
+
+            <div class="prompt-title">📝 PROMPT OFICIAL HIGGSFIELD AI (TEXT-TO-VIDEO / MOTION):</div>
+            <div class="prompt-text" id="prompt-letal">Full-body dynamic camera shot of a young Latina female electronic DJ running forward in an athletic energetic stride down a wet neon cyberpunk street in Bogota Zona T. She is wearing a sleek form-fitting all-black latex tactical suit with strapped accents, fingerless gloves, and dark combat boots. She is holding a futuristic glowing violet neon electric violin in one hand, bow in the other hand, playing sharp rhythmic violin strokes in sync with heavy techno beats. Long glossy straight black hair flowing behind her in the night wind. Reflections of cyan, magenta, and purple nightclub neon signs on the damp asphalt. Cinematic motion blur, clean 3D game character animation, seamless running loop, photorealistic lighting, 60fps.</div>
+
+            <div class="action-row">
+                <button class="btn-copy" onclick="copyPrompt('prompt-letal')">📋 COPIAR PROMPT</button>
+                <a href="https://higgsfield.ai" target="_blank" class="btn-higgsfield">🚀 ABRIR HIGGSFIELD AI</a>
+            </div>
+
+            <div class="specs">
+                <div>Model: <span>Higgsfield DoP / Motion</span></div>
+                <div>Ratio: <span>16:9 / 9:16</span></div>
+                <div>BPM Sync: <span>130 BPM Techno</span></div>
+            </div>
+        </div>
+
+        <!-- DJ NÚÑEZ -->
+        <div class="card">
+            <div class="card-header">
+                <div class="dj-title">🐂🔥 DJ NÚÑEZ <span style="font-size:0.9rem; color:#fb923c;">(El Toro en Llamas 1-2-3-4)</span></div>
+                <span class="badge badge-orange">MOTION 8 &bull; 60 FPS</span>
+            </div>
+
+            <div class="video-box">
+                <!-- Simulación procedural de previsualización animada -->
+                <canvas id="canvas-nunez" class="video-canvas"></canvas>
+                <div class="video-overlay">● PREVIEW ANIMACIÓN CÍCLICA 60FPS</div>
+            </div>
+
+            <div class="prompt-title">📝 PROMPT OFICIAL HIGGSFIELD AI (TEXT-TO-VIDEO / MOTION):</div>
+            <div class="prompt-text" id="prompt-nunez">Full-body tracking shot of a fit athletic Latino male DJ running forward with heavy, powerful 1-2-3-4 rhythmic footsteps on wet city asphalt in Bogota Zona T at night. He has short fade haircut, neatly groomed beard and mustache, wearing an oversized black streetwear graphic hoodie, dark cargo pants, and high-top sneakers. Professional DJ studio headphones hanging tilted around his neck. Fiery amber, warm gold, and glowing orange flame particles erupt from his right foot every fourth step like a charging bull in flames. Club Octava and Baum neon signage glowing in background with red and orange club lasers cutting through dense fog. High energy, game-ready animation loop, dynamic camera follow, 60fps.</div>
+
+            <div class="action-row">
+                <button class="btn-copy" onclick="copyPrompt('prompt-nunez')">📋 COPIAR PROMPT</button>
+                <a href="https://higgsfield.ai" target="_blank" class="btn-higgsfield">🚀 ABRIR HIGGSFIELD AI</a>
+            </div>
+
+            <div class="specs">
+                <div>Model: <span>Higgsfield DoP / Motion</span></div>
+                <div>Ratio: <span>16:9 / 9:16</span></div>
+                <div>BPM Sync: <span>128 BPM Tech House</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyPrompt(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert("¡Prompt copiado al portapapeles! Pégalo directamente en Higgsfield AI.");
+        }
+
+        // Animación dinámica en vivo para previsualización
+        function animateCanvas(canvasId, isLetal) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = 600;
+            canvas.height = 300;
+            let t = 0;
+
+            function loop() {
+                t += 0.05;
+                ctx.fillStyle = '#05070e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Asfalto y líneas
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, 80); ctx.lineTo(0, canvas.height);
+                ctx.moveTo(canvas.width / 2, 80); ctx.lineTo(canvas.width, canvas.height);
+                ctx.stroke();
+
+                // Neón de fondo
+                const neonColor = isLetal ? '#a855f7' : '#f97316';
+                ctx.shadowColor = neonColor;
+                ctx.shadowBlur = 25;
+                ctx.fillStyle = neonColor;
+                ctx.fillRect(canvas.width / 2 - 80, 50, 160, 24);
+
+                // Silueta corredor con zancada
+                const stride = Math.sin(t * 5) * 20;
+                const charX = canvas.width / 2;
+                const charY = 180 + Math.abs(Math.sin(t * 5)) * 8;
+
+                ctx.fillStyle = '#0f172a';
+                ctx.shadowBlur = 0;
+                // Torso
+                ctx.fillRect(charX - 16, charY - 50, 32, 45);
+                // Cabeza
+                ctx.beginPath();
+                ctx.arc(charX, charY - 65, 14, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Piernas
+                ctx.strokeStyle = isLetal ? '#c084fc' : '#fed7aa';
+                ctx.lineWidth = 7;
+                ctx.beginPath();
+                ctx.moveTo(charX - 8, charY - 5); ctx.lineTo(charX - 8 + stride, charY + 35);
+                ctx.moveTo(charX + 8, charY - 5); ctx.lineTo(charX + 8 - stride, charY + 35);
+                ctx.stroke();
+
+                // Efecto especial (Violín o Fuego)
+                if (isLetal) {
+                    ctx.strokeStyle = '#e879f9';
+                    ctx.shadowColor = '#e879f9';
+                    ctx.shadowBlur = 18;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(charX - 25, charY - 35); ctx.lineTo(charX + 25, charY - 20);
+                    ctx.stroke();
+                } else {
+                    // Fuego en el 4to tiempo
+                    const flameBeat = (t * 2.5) % 4;
+                    if (flameBeat > 3.0) {
+                        ctx.fillStyle = '#f59e0b';
+                        ctx.shadowColor = '#ef4444';
+                        ctx.shadowBlur = 30;
+                        ctx.beginPath();
+                        ctx.arc(charX + 8 - stride, charY + 35, 18, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        window.onload = () => {
+            animateCanvas('canvas-letal', true);
+            animateCanvas('canvas-nunez', false);
+        };
+    </script>
+</body>
+</html>

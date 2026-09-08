@@ -578,7 +578,7 @@ class ZonaTRunnerGame {
         // Cyberpunk Bogotá midnight navy atmosphere (Image 2 style)
         const skyColor = 0x060913;
         this.scene.background = new THREE.Color(skyColor);
-        this.scene.fog = new THREE.FogExp2(skyColor, 0.007);
+        this.scene.fog = new THREE.FogExp2(0x0a0614, 0.012);
 
         if (this.player) {
             const posX = this.player.position.x;
@@ -1587,25 +1587,29 @@ class ZonaTRunnerGame {
     }
 
     initRain() {
-        // Neon rain atmosphere in Bogotá
-        const rainCount = 1200;
+        // Neon rain & club mist atmosphere in Bogotá
+        const rainCount = 2000;
         const rainGeo = new THREE.BufferGeometry();
         const positions = new Float32Array(rainCount * 3);
+        const velocities = new Float32Array(rainCount);
 
         for (let i = 0; i < rainCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 35;
-            positions[i + 1] = Math.random() * 30;
-            positions[i + 2] = (Math.random() - 0.5) * 80;
+            positions[i] = (Math.random() - 0.5) * 45;
+            positions[i + 1] = Math.random() * 35;
+            positions[i + 2] = (Math.random() - 0.5) * 110;
+            velocities[i / 3] = 25 + Math.random() * 20;
         }
 
         rainGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         const rainMat = new THREE.PointsMaterial({
-            color: 0x4488cc,
-            size: 0.15,
+            color: 0x00f3ff,
+            size: 0.22,
             transparent: true,
-            opacity: 0.4
+            opacity: 0.65,
+            blending: THREE.AdditiveBlending
         });
         this.rainParticles = new THREE.Points(rainGeo, rainMat);
+        this.rainVelocities = velocities;
         this.scene.add(this.rainParticles);
     }
 
@@ -2137,6 +2141,19 @@ class ZonaTRunnerGame {
             if (this.limbs.rightLeg) this.limbs.rightLeg.rotation.x = -legAngle;
             if (this.limbs.leftArm) this.limbs.leftArm.rotation.x = -legAngle * 0.8;
             if (this.limbs.rightArm) this.limbs.rightArm.rotation.x = legAngle * 0.8;
+        }
+
+        // 🌧️ Bogotá Cyberpunk Rain animation
+        if (this.rainParticles) {
+            const pos = this.rainParticles.geometry.attributes.position.array;
+            for (let i = 0; i < pos.length; i += 3) {
+                pos[i + 1] -= this.rainVelocities[i / 3] * dt;
+                if (pos[i + 1] < 0) {
+                    pos[i + 1] = 32;
+                    pos[i + 2] = this.player.position.z + (Math.random() - 0.2) * 90;
+                }
+            }
+            this.rainParticles.geometry.attributes.position.needsUpdate = true;
         } else if (this.isJumping) {
             if (this.limbs.leftLeg) this.limbs.leftLeg.rotation.x = 0.4;
             if (this.limbs.rightLeg) this.limbs.rightLeg.rotation.x = 0.4;
