@@ -1758,23 +1758,27 @@ class ZonaTRunnerGame {
             const signMat = new THREE.MeshBasicMaterial({ map: venue.tex, side: THREE.DoubleSide });
             const sign = new THREE.Mesh(signGeo, signMat);
 
-            if (venue.hasCanopy) {
-                // Marquesina extendida hacia el andén
-                const canopyGeo = new THREE.BoxGeometry(4.0, 0.45, 9.6);
-                const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, metalness: 0.9, roughness: 0.25 });
-                const canopy = new THREE.Mesh(canopyGeo, canopyMat);
-                canopy.position.set(-4.8, 4.0 - (bldgHeight / 2), 0);
-                bldg.add(canopy);
+            // Marquesina extendida hacia el andén
+            const canopyGeo = new THREE.BoxGeometry(4.5, 0.5, 9.6);
+            const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, metalness: 0.9, roughness: 0.25 });
+            const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+            canopy.position.set(-4.8, 4.2 - (bldgHeight / 2), 0);
+            bldg.add(canopy);
 
-                // Letrero frontal sobre la marquesina de cara al corredor
-                sign.rotation.y = Math.PI;
-                sign.position.set(-4.8, 4.2 - (bldgHeight / 2) + 1.0, -4.8);
-            } else {
-                // Letrero en fachada angular
-                sign.rotation.y = Math.PI * 0.88;
-                sign.position.set(-3.6, 6.8 - (bldgHeight / 2), -3.0);
-            }
-            bldg.add(sign);
+            // Letrero gigante perpendicular cruzando el andén hacia la calle (VISIBLE PARA EL CORREDOR)
+            const signFrontGeo = new THREE.PlaneGeometry(8.2, 2.2);
+            const signFrontMat = new THREE.MeshBasicMaterial({ map: venue.tex, side: THREE.DoubleSide });
+            const signFront = new THREE.Mesh(signFrontGeo, signFrontMat);
+            signFront.rotation.y = Math.PI * 0.92; // Ligeramente angulado hacia el jugador
+            signFront.position.set(-4.9, 5.8 - (bldgHeight / 2), -4.5);
+            bldg.add(signFront);
+
+            // Letrero en la fachada superior iluminado
+            const signWallGeo = new THREE.PlaneGeometry(9.5, 2.4);
+            const signWall = new THREE.Mesh(signWallGeo, signFrontMat);
+            signWall.rotation.y = -Math.PI / 2; // Paralelo a la fachada
+            signWall.position.set(-3.35, 9.5 - (bldgHeight / 2), 0);
+            bldg.add(signWall);
 
             // Luz volumétrica del club iluminando la pista
             const clubLight = new THREE.PointLight(venue.color, 4.0, 24);
@@ -1811,13 +1815,19 @@ class ZonaTRunnerGame {
             sf.position.set(3.34, 1.8 - (rightBldgHeight / 2), sfZ);
             rightBldg.add(sf);
 
-            // Neon Sign above vitrina
-            const rSignGeo = new THREE.PlaneGeometry(4.8, 1.4);
-            const rSignTex = ((segIndex + sidx) % 2 === 0) ? this.cyberpunkTextures.baumClub : this.cyberpunkTextures.kaputt;
+            // Discotecas en la acera derecha rotando también
+            const rightVenues = [this.cyberpunkTextures.capri, this.cyberpunkTextures.monoBandido, this.cyberpunkTextures.afterhouse, this.cyberpunkTextures.ratonClub, this.cyberpunkTextures.chula, this.cyberpunkTextures.malaflor];
+            const rSignGeo = new THREE.PlaneGeometry(7.2, 2.0);
+            const rSignTex = rightVenues[(segIndex + sidx) % rightVenues.length];
             const rSign = new THREE.Mesh(rSignGeo, new THREE.MeshBasicMaterial({ map: rSignTex, side: THREE.DoubleSide }));
-            rSign.rotation.y = Math.PI / 2;
-            rSign.position.set(3.35, 4.2 - (rightBldgHeight / 2), sfZ);
+            rSign.rotation.y = Math.PI * 0.08; // Angulado hacia el frente del corredor
+            rSign.position.set(4.5, 5.0 - (rightBldgHeight / 2), sfZ - 2.5);
             rightBldg.add(rSign);
+
+            const rWallSign = new THREE.Mesh(new THREE.PlaneGeometry(8.5, 2.2), new THREE.MeshBasicMaterial({ map: rSignTex, side: THREE.DoubleSide }));
+            rWallSign.rotation.y = Math.PI / 2;
+            rWallSign.position.set(3.35, 8.8 - (rightBldgHeight / 2), sfZ);
+            rightBldg.add(rWallSign);
         });
 
         const rightLight = new THREE.PointLight((segIndex % 2 === 0) ? 0xcc00ff : 0x00ffcc, 2.5, 18);
