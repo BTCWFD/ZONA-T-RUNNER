@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZONA T RUNNER — Showcase 3D & AI Assets</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #070913; color: #fff; padding: 25px 20px 60px 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { font-size: 2.2rem; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #00f3ff; text-shadow: 0 0 20px rgba(0, 243, 255, 0.4); }
+        .subtitle { font-size: 1rem; color: #8892b0; margin-top: 6px; }
+        .nav-links { display: flex; justify-content: center; gap: 15px; margin-top: 18px; }
+        .btn-link { background: #ff0055; color: white; text-decoration: none; padding: 10px 22px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); transition: 0.2s; }
+        .btn-link:hover { transform: scale(1.05); }
+        .btn-secondary { background: #1a2035; color: #00f3ff; border: 1px solid #00f3ff; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px; max-width: 1400px; margin: 0 auto; }
+        .card { background: #0e1222; border: 1px solid #1f2942; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid #1f2942; display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 1.15rem; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 800; text-transform: uppercase; }
+        .badge-blender { background: #ea7600; color: #fff; }
+        .badge-ai { background: #a855f7; color: #fff; }
+        
+        .card-img { width: 100%; height: 260px; object-fit: cover; display: block; border-bottom: 1px solid #1f2942; background: #05070d; }
+        .card-body { padding: 20px; }
+        .venue-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .venue-tag { background: #161c30; border: 1px solid #283353; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; color: #00e5ff; }
+        
+        .prompt-box { background: #070913; border: 1px solid #283353; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.82rem; color: #a5b4fc; line-height: 1.5; margin-top: 10px; user-select: all; }
+        .param-list { margin-top: 10px; font-size: 0.85rem; color: #94a3b8; }
+        .param-list strong { color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="title">🌆 ZONA T BOGOTÁ — SHOWCASE 3D & AI</h1>
+        <p class="subtitle">Modelado arquitectónico procedural en Blender 5.2 & Generación de Animación para Higgsfield AI</p>
+        <div class="nav-links">
+            <a href="/" class="btn-link">🎮 JUGAR ZONA T RUNNER EN VIVO</a>
+            <a href="assets/ZonaT_Bogota_Map.glb" class="btn-link btn-secondary" download>📦 DESCARGAR GLB DEL MAPA</a>
+            <a href="assets/DJs_Letal_Nunez_Models.glb" class="btn-link btn-secondary" download>👤 DESCARGAR GLB DE LOS DJS</a>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Card 1: Blender Map -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🏙️ Mapa Zona T Bogotá (Calle 82 / Cra 13)</div>
+                <span class="badge badge-blender">BLENDER 5.2</span>
+            </div>
+            <img src="assets/blender_map_render.png" class="card-img" alt="Render Blender Zona T">
+            <div class="card-body">
+                <p style="color: #cbd5e1; font-size: 0.9rem;">Geometría modular y calzada urbana con asfalto mojado, andenes peatonales, bolardos bogotanos cilíndricos y pórtico aéreo con megapantalla LED BAUM.</p>
+                <div style="margin-top: 14px; font-size: 0.85rem; color: #94a3b8; font-weight: bold;">Discotecas y Spots Integrados en la Malla:</div>
+                <div class="venue-list">
+                    <span class="venue-tag">Club Octava</span>
+                    <span class="venue-tag">Andrés D.C.</span>
+                    <span class="venue-tag">L1FE Bogotá</span>
+                    <span class="venue-tag">La Chula</span>
+                    <span class="venue-tag">Capri Club</span>
+                    <span class="venue-tag">Malaflor</span>
+                    <span class="venue-tag">El Mono Bandido</span>
+                    <span class="venue-tag">Afterhouse</span>
+                    <span class="venue-tag">Ratón Club</span>
+                    <span class="venue-tag">Baum Festival</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Blender Characters -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🎧 Modelos 3D: DJ Letal & DJ Núñez</div>
+                <span class="badge badge-blender">BLENDER 5.2</span>
+            </div>
+            <img src="assets/blender_djs_render.png" class="card-img" alt="Render Blender DJs">
+            <div class="card-body">
+                <p style="color: #cbd5e1; font-size: 0.9rem;">Modelos base para rigging de corredores con los accesorios representativos levantados de sus perfiles reales de Instagram:</p>
+                <ul style="margin-top: 10px; margin-left: 20px; font-size: 0.85rem; color: #94a3b8; line-height: 1.6;">
+                    <li><strong>DJ LETAL (Sara Lucía):</strong> Traje táctico de látex negro, zancada fluida y <em>violín eléctrico neón violeta</em>.</li>
+                    <li><strong>DJ NÚÑEZ (Luis Núñez):</strong> Hoodie streetwear oversize, audífonos profesionales al cuello y <em>pisada con fuego en el 4to compás (El Toro en Llamas)</em>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Card 3: Higgsfield DJ Letal -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">💜 Higgsfield Prompt: DJ Letal (Techno Violin)</div>
+                <span class="badge badge-ai">HIGGSFIELD AI</span>
+            </div>
+            <div class="card-body">
+                <div style="font-size: 0.85rem; color: #94a3b8;">Prompt listo para generar video/animación de sprint continuo con violín:</div>
+                <div class="prompt-box">
+Full-body dynamic camera shot of a young Latina female electronic DJ running forward in an athletic energetic stride down a wet neon cyberpunk street in Bogota Zona T. She is wearing a sleek form-fitting all-black latex tactical suit with strapped accents, fingerless gloves, and dark combat boots. She is holding a futuristic glowing violet neon electric violin in one hand, bow in the other hand, playing sharp rhythmic violin strokes in sync with heavy techno beats. Long glossy straight black hair flowing behind her in the night wind. Reflections of cyan, magenta, and purple nightclub neon signs on the damp asphalt. Cinematic motion blur, clean 3D game character animation, seamless running loop, photorealistic lighting, 60fps.
+                </div>
+                <div class="param-list">
+                    <strong>Parámetros:</strong> Motion: 7 &bull; Camera: 3/4 Tracking Follow &bull; 60 FPS
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Higgsfield DJ Núñez -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🐂🔥 Higgsfield Prompt: DJ Núñez (El Toro en Llamas)</div>
+                <span class="badge badge-ai">HIGGSFIELD AI</span>
+            </div>
+            <div class="card-body">
+                <div style="font-size: 0.85rem; color: #94a3b8;">Prompt listo para generar la animación de pisada pesada 1-2-3-4 Stomp:</div>
+                <div class="prompt-box">
+Full-body tracking shot of a fit athletic Latino male DJ running forward with heavy, powerful 1-2-3-4 rhythmic footsteps on wet city asphalt in Bogota Zona T at night. He has short fade haircut, neatly groomed beard and mustache, wearing an oversized black streetwear graphic hoodie, dark cargo pants, and high-top sneakers. Professional DJ studio headphones hanging tilted around his neck. Fiery amber, warm gold, and glowing orange flame particles erupt from his right foot every fourth step like a charging bull in flames. Club Octava and Baum neon signage glowing in background with red and orange club lasers cutting through dense fog. High energy, game-ready animation loop, dynamic camera follow, 60fps.
+                </div>
+                <div class="param-list">
+                    <strong>Parámetros:</strong> Motion: 8 &bull; Camera: Low-angle Stride Follow &bull; 60 FPS
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
