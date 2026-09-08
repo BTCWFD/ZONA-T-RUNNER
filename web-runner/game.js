@@ -21,6 +21,7 @@ const DJS = [
         worldColor: 0x07040d,
         groundColor: 0x120a1b,
         neonColor: 0xff0055,
+        avatar: "assets/avatars/dj_fresar.jpg",
         synthFreq: 55, // A1
         promo: {
             title: "FRESAR — Residencia Viernes (Club Octava)",
@@ -111,7 +112,7 @@ const DJS = [
         worldColor: 0x0a0118,
         groundColor: 0x180030,
         neonColor: 0xcc00ff,
-        avatar: "zara_avatar.jpg",
+        avatar: "assets/avatars/dj_letal.jpg",
         synthFreq: 82.4, // E2
         promo: {
             title: "LETAL — Violin Techno Night (Zona T)",
@@ -130,7 +131,7 @@ const DJS = [
         worldColor: 0x180800,
         groundColor: 0x280e00,
         neonColor: 0xff6600,
-        avatar: "nunez_3d.jpg",
+        avatar: "assets/avatars/dj_nunez.jpg",
         synthFreq: 61.74, // B1
         promo: {
             title: "DJ NUÑEZ — El Toro en Llamas (Baum Club)",
@@ -149,7 +150,7 @@ const DJS = [
         worldColor: 0x00140a,
         groundColor: 0x002613,
         neonColor: 0x00ff88,
-        avatar: "tatan_avatar.jpg",
+        avatar: "assets/avatars/dj_tatan.jpg",
         synthFreq: 51.91, // G#1
         promo: {
             title: "DJ TATAN — Residencia Oficial (Club Octava)",
