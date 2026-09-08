@@ -1,0 +1,40 @@
+﻿import bpy
+import math
+
+blend_path = r"c:\Program Files\PROYECTOS DE PROGRAMACION\ZONAT-RUNNER\blender_map\DJs_4_AllStars.blend"
+bpy.ops.wm.open_mainfile(filepath=blend_path)
+
+scene = bpy.context.scene
+scene.render.engine = 'BLENDER_WORKBENCH'
+scene.render.resolution_x = 1920
+scene.render.resolution_y = 1080
+scene.render.image_settings.file_format = 'PNG'
+scene.display.shading.light = 'STUDIO'
+scene.display.shading.color_type = 'MATERIAL'
+scene.display.shading.show_shadows = True
+
+# Separación más compacta para encuadrar los 4 personajes:
+# Letal: X = -2.1
+# Nuñez: X = -0.7
+# Tatán: X = +0.7
+# Fresar: X = +2.1
+for o in bpy.data.objects:
+    if o.name.startswith("Letal"):
+        o.location.x = -2.1 + (0.25 if "Violin" in o.name else 0)
+    elif o.name.startswith("Nunez"):
+        o.location.x = -0.7 + (0.2 if "Flame" in o.name else 0)
+    elif o.name.startswith("Tatan"):
+        o.location.x = 0.7
+    elif o.name.startswith("Fresar"):
+        o.location.x = 2.1 + (0.15 if "Visor" in o.name else 0)
+
+cam = scene.camera
+cam.location = (0, -7.0, 1.4)
+cam.rotation_euler = (math.radians(85), 0, 0)
+
+scene.render.filepath = r"c:\Program Files\PROYECTOS DE PROGRAMACION\ZONAT-RUNNER\blender_map\DJs_4_AllStars_Lineup.png"
+bpy.ops.render.render(write_still=True)
+bpy.ops.wm.save_as_mainfile(filepath=blend_path)
+bpy.ops.export_scene.fbx(filepath=r"c:\Program Files\PROYECTOS DE PROGRAMACION\ZONAT-RUNNER\blender_map\DJs_4_AllStars.fbx", use_selection=False)
+bpy.ops.export_scene.gltf(filepath=r"c:\Program Files\PROYECTOS DE PROGRAMACION\ZONAT-RUNNER\blender_map\DJs_4_AllStars.glb", export_format='GLB')
+print("=== COMPACT LINEUP RENDER COMPLETE ===")

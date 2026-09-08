@@ -7,7 +7,7 @@ using ZonaTRunner.Core;
 
 public class ZonaTIntegratedSceneSetup
 {
-    [MenuItem("ZonaTRunner/Build Zona T Playable Game Scene")]
+    [MenuItem("ZonaTRunner/Build Zona T Playable Game Scene with 4 DJs")]
     public static void BuildScene()
     {
         var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
@@ -29,11 +29,11 @@ public class ZonaTIntegratedSceneSetup
             sun.transform.rotation = Quaternion.Euler(45f, -30f, 0f);
         }
 
-        // 2. GameManager & State Setup
+        // 2. GameManager Setup
         GameObject gmObj = new GameObject("GameManager");
-        var gm = gmObj.AddComponent<GameManager>();
+        gmObj.AddComponent<GameManager>();
 
-        // 3. Player GameObject with Controller
+        // 3. Player GameObject
         GameObject playerObj = new GameObject("Player");
         playerObj.tag = "Player";
         playerObj.transform.position = new Vector3(0f, 0f, 0f);
@@ -43,23 +43,22 @@ public class ZonaTIntegratedSceneSetup
         cc.radius = 0.4f;
         cc.height = 1.8f;
 
-        var pc = playerObj.AddComponent<PlayerController>();
+        playerObj.AddComponent<PlayerController>();
         playerObj.AddComponent<SwipeInputHandler>();
 
-        // Attach visual model (DJs Letal & Núñez)
-        GameObject djsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Characters/DJs_Letal_Nunez_Models.fbx");
+        // Visual DJ Models (4 DJs AllStars)
+        GameObject djsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Characters/DJs_4_AllStars.fbx");
         if (djsPrefab != null)
         {
             GameObject djsVisual = (GameObject)PrefabUtility.InstantiatePrefab(djsPrefab, playerObj.transform);
-            djsVisual.name = "DJ_Visual_Model";
+            djsVisual.name = "DJ_AllStars_Models";
             djsVisual.transform.localPosition = Vector3.zero;
         }
 
-        // 4. Map Segment Prefab Setup
+        // 4. Map Segment Spawner
         GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/ZonaT_Bogota_Map.fbx");
         if (mapPrefab != null)
         {
-            // Spawn initial stretches of Zona T street (0 to 320m)
             for (int i = 0; i < 4; i++)
             {
                 GameObject seg = (GameObject)PrefabUtility.InstantiatePrefab(mapPrefab);
@@ -103,6 +102,6 @@ public class ZonaTIntegratedSceneSetup
         // Save Scene
         string scenePath = "Assets/_Project/Scenes/ZonaT_Playable_Scene.unity";
         EditorSceneManager.SaveScene(scene, scenePath);
-        Debug.Log($"=== ZONA T PLAYABLE SCENE BUILT SUCCESSFULLY: {scenePath} ===");
+        Debug.Log($"=== ZONA T PLAYABLE SCENE WITH 4 DJS BUILT: {scenePath} ===");
     }
 }
