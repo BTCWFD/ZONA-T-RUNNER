@@ -1,0 +1,112 @@
+{
+  "$comment": "Kit modular de pista de ZONA T RUNNER. Generado por blender_map/build_track_kit.py.",
+  "version": "1.0.0",
+  "generator": "Blender 5.0.1 (bpy headless)",
+  "grid": {
+    "laneWidth": 2.4,
+    "lanes": [
+      -2.4,
+      0.0,
+      2.4
+    ],
+    "segmentLength": 40.0,
+    "streetWidth": 10.4,
+    "sidewalkWidth": 4.8,
+    "groundZ": 0.0,
+    "tokenHeight": 1.1
+  },
+  "anchoring": "Cada segmento tiene su origen en (0,0,0) y crece hacia +Y hasta segmentLength. Para encadenar: siguiente.y = anterior.y + segmentLength. Los obstaculos y coleccionables se instancian con su origen en la base, sobre uno de los tres carriles.",
+  "parts": [
+    {
+      "name": "SEG_Street",
+      "kind": "segment",
+      "description": "Avenida base: calzada mojada, andenes, bolardos y alumbrado. Relleno neutro.",
+      "glb": "track_kit/SEG_Street.glb",
+      "fbx": "track_kit/SEG_Street.fbx",
+      "triangles": 636,
+      "objects": 37
+    },
+    {
+      "name": "SEG_ClubBlock",
+      "kind": "segment",
+      "description": "Manzana de clubes: fachadas de ladrillo, vitrinas, marquesinas y letreros de neon.",
+      "glb": "track_kit/SEG_ClubBlock.glb",
+      "fbx": "track_kit/SEG_ClubBlock.fbx",
+      "triangles": 668,
+      "objects": 53
+    },
+    {
+      "name": "SEG_Gantry",
+      "kind": "segment",
+      "description": "Portico con mega-valla LED cruzando la avenida. Espacio publicitario principal.",
+      "glb": "track_kit/SEG_Gantry.glb",
+      "fbx": "track_kit/SEG_Gantry.fbx",
+      "triangles": 296,
+      "objects": 22
+    },
+    {
+      "name": "SEG_Construction",
+      "kind": "segment",
+      "description": "Obra en via: andamio para deslizarse, vallas naranja y escombros.",
+      "glb": "track_kit/SEG_Construction.glb",
+      "fbx": "track_kit/SEG_Construction.fbx",
+      "triangles": 392,
+      "objects": 26
+    },
+    {
+      "name": "OBS_JumpBarrier",
+      "kind": "obstacle",
+      "description": "Barrera baja de concreto. Interaccion: SALTAR. Ocupa 1 carril.",
+      "glb": "track_kit/OBS_JumpBarrier.glb",
+      "fbx": "track_kit/OBS_JumpBarrier.fbx",
+      "triangles": 24,
+      "objects": 2
+    },
+    {
+      "name": "OBS_SlideScaffold",
+      "kind": "obstacle",
+      "description": "Andamio alto con paso libre a 2.3 m. Interaccion: DESLIZAR. Ocupa 1 carril.",
+      "glb": "track_kit/OBS_SlideScaffold.glb",
+      "fbx": "track_kit/OBS_SlideScaffold.fbx",
+      "triangles": 104,
+      "objects": 6
+    },
+    {
+      "name": "OBS_SpeakerStack",
+      "kind": "obstacle",
+      "description": "Torre de bafles Funktion-One. Bloquea el carril: obliga a cambiar de carril.",
+      "glb": "track_kit/OBS_SpeakerStack.glb",
+      "fbx": "track_kit/OBS_SpeakerStack.fbx",
+      "triangles": 180,
+      "objects": 7
+    },
+    {
+      "name": "PROP_Streetlight",
+      "kind": "prop",
+      "description": "Poste de alumbrado con luminaria ambar.",
+      "glb": "track_kit/PROP_Streetlight.glb",
+      "fbx": "track_kit/PROP_Streetlight.fbx",
+      "triangles": 52,
+      "objects": 3
+    },
+    {
+      "name": "PROP_Billboard",
+      "kind": "prop",
+      "description": "Valla LED lateral. Inventario publicitario secundario (texture swap en runtime).",
+      "glb": "track_kit/PROP_Billboard.glb",
+      "fbx": "track_kit/PROP_Billboard.fbx",
+      "triangles": 36,
+      "objects": 3
+    },
+    {
+      "name": "COL_Token",
+      "kind": "collectible",
+      "description": "Token Zona T. Se instancia en fila sobre un carril, a 1.1 m del suelo.",
+      "glb": "track_kit/COL_Token.glb",
+      "fbx": "track_kit/COL_Token.fbx",
+      "triangles": 60,
+      "objects": 1
+    }
+  ],
+  "totalTriangles": 2448
+}

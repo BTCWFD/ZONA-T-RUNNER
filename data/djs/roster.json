@@ -1,0 +1,780 @@
+{
+  "$comment": "FUENTE UNICA DE VERDAD del roster. No editar DJs en game.js ni en Unity: editar aqui.",
+  "schema": "dj_schema.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-09-09",
+  "djs": [
+    {
+      "id": "dj_fresar",
+      "name": "FRESAR",
+      "slug": "fresar",
+      "bio": "Pionero del sonido industrial bogotano. Visor ciberpunk con display LED carmesí que decodifica las frecuencias del BPM en tiempo real.",
+      "genre": "Industrial Techno",
+      "tier": "free",
+      "unlockCost": 0,
+      "sortOrder": 0,
+      "character": {
+        "prefab": "characters/fresar",
+        "displayName": "FRESAR",
+        "avatar": "assets/avatars/dj_fresar.jpg",
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#ff0055",
+        "accentColor": "#ff0055",
+        "particleColor": "#ff0055"
+      },
+      "world": {
+        "themeId": "world_fresar",
+        "fogColor": "#07040d",
+        "groundColor": "#120a1b",
+        "ambientLight": "#ff0055",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 138,
+        "mainTrack": "audio/djs/fresar/main.ogg",
+        "stems": {
+          "drums": "audio/djs/fresar/drums.ogg",
+          "bass": "audio/djs/fresar/bass.ogg",
+          "synth": "audio/djs/fresar/synth.ogg",
+          "vocals": "audio/djs/fresar/vocals.ogg"
+        },
+        "intensity": 0.6666666666666666,
+        "synthFreq": 55
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "overdrive_visor",
+        "abilityName": "Overdrive Visor",
+        "abilityDescription": "Aumenta la velocidad máxima un 15% y atrae automáticamente los tokens cercanos al entrar en estado de Fever."
+      },
+      "residencies": [
+        "Club Octava (Happy Brunch Sessions)",
+        "Mad Radio"
+      ],
+      "promotions": [
+        {
+          "promoId": "dj_fresar_launch",
+          "title": "FRESAR — Residencia Viernes (Club Octava)",
+          "code": "FRESAR15",
+          "discount": "15% OFF Cover Viernes",
+          "venue": "Club Octava - Chapinero",
+          "active": true
+        }
+      ],
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/fresar/"
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "active",
+        "source": "docs/LORE_PERSONAJES_DJS.md"
+      }
+    },
+    {
+      "id": "dj_noctua",
+      "name": "NOCTUA",
+      "slug": "noctua",
+      "bio": "",
+      "genre": "Melodic & Prog",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 1,
+      "character": {
+        "prefab": "characters/noctua",
+        "displayName": "NOCTUA",
+        "avatar": null,
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#00ffff",
+        "accentColor": "#00d9ff",
+        "particleColor": "#00d9ff"
+      },
+      "world": {
+        "themeId": "world_noctua",
+        "fogColor": "#030d17",
+        "groundColor": "#071b2d",
+        "ambientLight": "#00d9ff",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 124,
+        "mainTrack": "audio/djs/noctua/main.ogg",
+        "stems": {
+          "drums": "audio/djs/noctua/drums.ogg",
+          "bass": "audio/djs/noctua/bass.ogg",
+          "synth": "audio/djs/noctua/synth.ogg",
+          "vocals": "audio/djs/noctua/vocals.ogg"
+        },
+        "intensity": 0.2,
+        "synthFreq": 65.4
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_noctua_launch",
+          "title": "NOCTUA — Sunrise Session (Terraza Chapinero)",
+          "code": "NOCTUA2X1",
+          "discount": "2x1 en Entradas Early Bird",
+          "venue": "Terraza 85 - Calle 85",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_camilo",
+      "name": "CAMILO B2B",
+      "slug": "camilo",
+      "bio": "",
+      "genre": "Hardgroove",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 2,
+      "character": {
+        "prefab": "characters/camilo",
+        "displayName": "CAMILO B2B",
+        "avatar": null,
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#ffaa00",
+        "accentColor": "#ffbb00",
+        "particleColor": "#ffbb00"
+      },
+      "world": {
+        "themeId": "world_camilo",
+        "fogColor": "#120c03",
+        "groundColor": "#221706",
+        "ambientLight": "#ffbb00",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 142,
+        "mainTrack": "audio/djs/camilo/main.ogg",
+        "stems": {
+          "drums": "audio/djs/camilo/drums.ogg",
+          "bass": "audio/djs/camilo/bass.ogg",
+          "synth": "audio/djs/camilo/synth.ogg",
+          "vocals": "audio/djs/camilo/vocals.ogg"
+        },
+        "intensity": 0.8,
+        "synthFreq": 73.4
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_camilo_launch",
+          "title": "BOGOTÁ HARDGROOVE VOL. 3",
+          "code": "GROOVE20",
+          "discount": "20% OFF Merchandising Oficial",
+          "venue": "Radio Estrella - Calle 64",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_valeria",
+      "name": "VALERIA NEON",
+      "slug": "valeria",
+      "bio": "",
+      "genre": "Acid & Minimal",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 3,
+      "character": {
+        "prefab": "characters/valeria",
+        "displayName": "VALERIA NEON",
+        "avatar": null,
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#00ff66",
+        "accentColor": "#39ff14",
+        "particleColor": "#39ff14"
+      },
+      "world": {
+        "themeId": "world_valeria",
+        "fogColor": "#031206",
+        "groundColor": "#08240d",
+        "ambientLight": "#39ff14",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 132,
+        "mainTrack": "audio/djs/valeria/main.ogg",
+        "stems": {
+          "drums": "audio/djs/valeria/drums.ogg",
+          "bass": "audio/djs/valeria/bass.ogg",
+          "synth": "audio/djs/valeria/synth.ogg",
+          "vocals": "audio/djs/valeria/vocals.ogg"
+        },
+        "intensity": 0.4666666666666667,
+        "synthFreq": 49
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_valeria_launch",
+          "title": "VALERIA — Acid Night (Zona Rosa)",
+          "code": "ACIDNIGHT",
+          "discount": "Coctel de bienvenida gratis",
+          "venue": "Kaputt Club - Calle 72",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_bogota_allstars",
+      "name": "ZONA T COLECTIVO",
+      "slug": "bogota-allstars",
+      "bio": "",
+      "genre": "Underground House",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 4,
+      "character": {
+        "prefab": "characters/bogota-allstars",
+        "displayName": "ZONA T COLECTIVO",
+        "avatar": null,
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#b000ff",
+        "accentColor": "#d400ff",
+        "particleColor": "#d400ff"
+      },
+      "world": {
+        "themeId": "world_bogota_allstars",
+        "fogColor": "#0d0317",
+        "groundColor": "#1f0730",
+        "ambientLight": "#d400ff",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 128,
+        "mainTrack": "audio/djs/bogota-allstars/main.ogg",
+        "stems": {
+          "drums": "audio/djs/bogota-allstars/drums.ogg",
+          "bass": "audio/djs/bogota-allstars/bass.ogg",
+          "synth": "audio/djs/bogota-allstars/synth.ogg",
+          "vocals": "audio/djs/bogota-allstars/vocals.ogg"
+        },
+        "intensity": 0.3333333333333333,
+        "synthFreq": 58.27
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_bogota_allstars_launch",
+          "title": "FESTIVAL ZONA T 2026 — Preventa Exclusiva",
+          "code": "FESTZONAT",
+          "discount": "Pase VIP con 25% descuento",
+          "venue": "Chamorro City Hall - Autonorte",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_letal",
+      "name": "LETAL",
+      "slug": "letal",
+      "bio": "Fundadora de Letal Records. Traje táctico de látex all-black, cat-eye marcado y violín eléctrico neón violeta.",
+      "genre": "Violin Techno",
+      "tier": "free",
+      "unlockCost": 0,
+      "sortOrder": 5,
+      "character": {
+        "prefab": "characters/letal",
+        "displayName": "LETAL",
+        "avatar": "assets/avatars/dj_letal.jpg",
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#cc00ff",
+        "accentColor": "#cc00ff",
+        "particleColor": "#cc00ff"
+      },
+      "world": {
+        "themeId": "world_letal",
+        "fogColor": "#0a0118",
+        "groundColor": "#180030",
+        "ambientLight": "#cc00ff",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 130,
+        "mainTrack": "audio/djs/letal/main.ogg",
+        "stems": {
+          "drums": "audio/djs/letal/drums.ogg",
+          "bass": "audio/djs/letal/bass.ogg",
+          "synth": "audio/djs/letal/synth.ogg",
+          "vocals": "audio/djs/letal/vocals.ogg"
+        },
+        "intensity": 0.4,
+        "synthFreq": 82.4
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "electro_bow",
+        "abilityName": "Arco Electromagnético",
+        "abilityDescription": "Su violín eléctrico ultravioleta genera un imán permanente de corto alcance que atrae tokens en los 3 carriles."
+      },
+      "residencies": [
+        "Radio Berlin",
+        "Bling Bling",
+        "Octava",
+        "Grand Park Hotel"
+      ],
+      "promotions": [
+        {
+          "promoId": "dj_letal_launch",
+          "title": "LETAL — Violin Techno Night (Zona T)",
+          "code": "LETAL20",
+          "discount": "20% OFF en la puerta",
+          "venue": "Club Bling Bling - Zona Rosa",
+          "active": true
+        }
+      ],
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/letal._/"
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "realName": "Sara Lucía Flórez García",
+        "status": "active",
+        "source": "docs/LORE_PERSONAJES_DJS.md"
+      }
+    },
+    {
+      "id": "dj_nunez",
+      "name": "DJ NUÑEZ",
+      "slug": "nunez",
+      "bio": "\"El Toro en Llamas\". Hoodie streetwear oversize, audífonos de lado y aura de fuego ámbar.",
+      "genre": "Tech House / Groove",
+      "tier": "free",
+      "unlockCost": 0,
+      "sortOrder": 6,
+      "character": {
+        "prefab": "characters/nunez",
+        "displayName": "DJ NUÑEZ",
+        "avatar": "assets/avatars/dj_nunez.jpg",
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#ff5500",
+        "accentColor": "#ff6600",
+        "particleColor": "#ff6600"
+      },
+      "world": {
+        "themeId": "world_nunez",
+        "fogColor": "#180800",
+        "groundColor": "#280e00",
+        "ambientLight": "#ff6600",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 128,
+        "mainTrack": "audio/djs/nunez/main.ogg",
+        "stems": {
+          "drums": "audio/djs/nunez/drums.ogg",
+          "bass": "audio/djs/nunez/bass.ogg",
+          "synth": "audio/djs/nunez/synth.ogg",
+          "vocals": "audio/djs/nunez/vocals.ogg"
+        },
+        "intensity": 0.3333333333333333,
+        "synthFreq": 61.74
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "stomp_flame",
+        "abilityName": "1-2-3-4 Stomp Flame",
+        "abilityDescription": "En el cuarto tiempo de cada compás su pisada derecha desata una onda de fuego que destruye obstáculos bajos."
+      },
+      "residencies": [
+        "L1FE Bogotá (Main Stage & Bunker)",
+        "Baum Club",
+        "Octava"
+      ],
+      "promotions": [
+        {
+          "promoId": "dj_nunez_launch",
+          "title": "DJ NUÑEZ — El Toro en Llamas (Baum Club)",
+          "code": "TORO15",
+          "discount": "15% OFF + Stomp Pass",
+          "venue": "Baum Club - Calle 33",
+          "active": true
+        }
+      ],
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/dj.nunezz/"
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "realName": "Luis M. Núñez",
+        "status": "active",
+        "source": "docs/LORE_PERSONAJES_DJS.md"
+      }
+    },
+    {
+      "id": "dj_tatan",
+      "name": "DJ TATAN",
+      "slug": "tatan",
+      "bio": "Residente icónico de Octava y guardián de las frecuencias graves de la Calle 63 y la Zona T. Chaqueta táctica negra mate con circuitos bioluminiscentes que laten al compás.",
+      "genre": "Peak Time Techno",
+      "tier": "free",
+      "unlockCost": 0,
+      "sortOrder": 7,
+      "character": {
+        "prefab": "characters/tatan",
+        "displayName": "DJ TATAN",
+        "avatar": "assets/avatars/dj_tatan.jpg",
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#00ff88",
+        "accentColor": "#00ff88",
+        "particleColor": "#00ff88"
+      },
+      "world": {
+        "themeId": "world_tatan",
+        "fogColor": "#00140a",
+        "groundColor": "#002613",
+        "ambientLight": "#00ff88",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 134,
+        "mainTrack": "audio/djs/tatan/main.ogg",
+        "stems": {
+          "drums": "audio/djs/tatan/drums.ogg",
+          "bass": "audio/djs/tatan/bass.ogg",
+          "synth": "audio/djs/tatan/synth.ogg",
+          "vocals": "audio/djs/tatan/vocals.ogg"
+        },
+        "intensity": 0.5333333333333333,
+        "synthFreq": 51.91
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "shield_pulse",
+        "abilityName": "Escudo Octava Pulse",
+        "abilityDescription": "Inicia cada carrera con un escudo electromagnético reforzado que absorbe el primer impacto sin perder el multiplicador de velocidad."
+      },
+      "residencies": [
+        "Club Octava",
+        "W Bogotá",
+        "Mad Radio Bogotá"
+      ],
+      "promotions": [
+        {
+          "promoId": "dj_tatan_launch",
+          "title": "DJ TATAN — Residencia Oficial (Club Octava)",
+          "code": "TATANOCTAVA",
+          "discount": "20% OFF en Cover y Mesa",
+          "venue": "Club Octava - Chapinero",
+          "active": true
+        }
+      ],
+      "socialLinks": {
+        "instagram": "https://www.instagram.com/djcalvinparra/"
+      },
+      "metadata": {
+        "version": "1.0.0",
+        "realName": "Calvin Parra",
+        "status": "active",
+        "source": "docs/LORE_PERSONAJES_DJS.md"
+      }
+    },
+    {
+      "id": "dj_molecular",
+      "name": "DJ MOLECULAR",
+      "slug": "molecular",
+      "bio": "",
+      "genre": "Psy-Techno & Industrial",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 8,
+      "character": {
+        "prefab": "characters/molecular",
+        "displayName": "DJ MOLECULAR",
+        "avatar": "molecular_avatar.jpg",
+        "isFemale": false
+      },
+      "visualIdentity": {
+        "primaryColor": "#00e5ff",
+        "accentColor": "#00e5ff",
+        "particleColor": "#00e5ff"
+      },
+      "world": {
+        "themeId": "world_molecular",
+        "fogColor": "#000e18",
+        "groundColor": "#001c2e",
+        "ambientLight": "#00e5ff",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 136,
+        "mainTrack": "audio/djs/molecular/main.ogg",
+        "stems": {
+          "drums": "audio/djs/molecular/drums.ogg",
+          "bass": "audio/djs/molecular/bass.ogg",
+          "synth": "audio/djs/molecular/synth.ogg",
+          "vocals": "audio/djs/molecular/vocals.ogg"
+        },
+        "intensity": 0.6,
+        "synthFreq": 46.25
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_molecular_launch",
+          "title": "MOLECULAR — Quantum Techno Night",
+          "code": "MOLECULAR_VIP",
+          "discount": "Pase VIP Backstage",
+          "venue": "Radio Berlin - Chapinero",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_sthep",
+      "name": "DJ STHEP",
+      "slug": "sthep",
+      "bio": "",
+      "genre": "Melodic Techno & Vocal",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 9,
+      "character": {
+        "prefab": "characters/sthep",
+        "displayName": "DJ STHEP",
+        "avatar": null,
+        "isFemale": true
+      },
+      "visualIdentity": {
+        "primaryColor": "#ff007f",
+        "accentColor": "#ff007f",
+        "particleColor": "#ff007f"
+      },
+      "world": {
+        "themeId": "world_sthep",
+        "fogColor": "#160010",
+        "groundColor": "#2d0022",
+        "ambientLight": "#ff007f",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 126,
+        "mainTrack": "audio/djs/sthep/main.ogg",
+        "stems": {
+          "drums": "audio/djs/sthep/drums.ogg",
+          "bass": "audio/djs/sthep/bass.ogg",
+          "synth": "audio/djs/sthep/synth.ogg",
+          "vocals": "audio/djs/sthep/vocals.ogg"
+        },
+        "intensity": 0.26666666666666666,
+        "synthFreq": 69.3
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_sthep_launch",
+          "title": "DJ STHEP — Melodic Horizon Tour",
+          "code": "STHEP25",
+          "discount": "25% OFF en Boletería",
+          "venue": "Kaputt Club - Calle 72",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    },
+    {
+      "id": "dj_camila_leuro",
+      "name": "CAMILA LEURO",
+      "slug": "camila-leuro",
+      "bio": "",
+      "genre": "Deep Minimal & Hypnotic",
+      "tier": "unlockable",
+      "unlockCost": 2500,
+      "sortOrder": 10,
+      "character": {
+        "prefab": "characters/camila-leuro",
+        "displayName": "CAMILA LEURO",
+        "avatar": null,
+        "isFemale": true
+      },
+      "visualIdentity": {
+        "primaryColor": "#a855f7",
+        "accentColor": "#c084fc",
+        "particleColor": "#c084fc"
+      },
+      "world": {
+        "themeId": "world_camila_leuro",
+        "fogColor": "#0e0018",
+        "groundColor": "#1e0033",
+        "ambientLight": "#c084fc",
+        "weatherEffect": "rain"
+      },
+      "music": {
+        "bpm": 124,
+        "mainTrack": "audio/djs/camila-leuro/main.ogg",
+        "stems": {
+          "drums": "audio/djs/camila-leuro/drums.ogg",
+          "bass": "audio/djs/camila-leuro/bass.ogg",
+          "synth": "audio/djs/camila-leuro/synth.ogg",
+          "vocals": "audio/djs/camila-leuro/vocals.ogg"
+        },
+        "intensity": 0.2,
+        "synthFreq": 77.78
+      },
+      "stats": {
+        "laneSwitchSpeed": 1,
+        "jumpForce": 1,
+        "slideSpeed": 1,
+        "coinMultiplier": 1,
+        "scoreMultiplier": 1,
+        "specialAbility": "none",
+        "abilityName": null,
+        "abilityDescription": null
+      },
+      "residencies": [],
+      "promotions": [
+        {
+          "promoId": "dj_camila_leuro_launch",
+          "title": "CAMILA LEURO — Hypnotic Frequencies",
+          "code": "CAMILAVIP",
+          "discount": "20% OFF + Cóctel de Cortesía",
+          "venue": "Vlak - Parque 93",
+          "active": true
+        }
+      ],
+      "socialLinks": {},
+      "metadata": {
+        "version": "1.0.0",
+        "realName": null,
+        "status": "draft",
+        "source": "web-runner/game.js"
+      }
+    }
+  ]
+}

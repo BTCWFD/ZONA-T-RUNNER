@@ -9,214 +9,82 @@
  * - In-game Pause (ESC / P), High Score persistence (LocalStorage)
  */
 
-// --- 1. DATA-DRIVEN CONFIGURATION: 5 BOGOTÁ DJs ---
-const DJS = [
-    {
-        id: "dj_fresar",
-        name: "FRESAR",
-        genre: "Industrial Techno",
-        bpm: 138,
-        color: "#ff0055",
-        colorHex: 0xff0055,
-        worldColor: 0x07040d,
-        groundColor: 0x120a1b,
-        neonColor: 0xff0055,
-        avatar: "assets/avatars/dj_fresar.jpg",
-        synthFreq: 55, // A1
-        promo: {
-            title: "FRESAR — Residencia Viernes (Club Octava)",
-            code: "FRESAR15",
-            discount: "15% OFF Cover Viernes",
-            venue: "Club Octava - Chapinero"
-        }
-    },
-    {
-        id: "dj_noctua",
-        name: "NOCTUA",
-        genre: "Melodic & Prog",
-        bpm: 124,
-        color: "#00ffff",
-        colorHex: 0x00ffff,
-        worldColor: 0x030d17,
-        groundColor: 0x071b2d,
-        neonColor: 0x00d9ff,
-        synthFreq: 65.4, // C2
-        promo: {
-            title: "NOCTUA — Sunrise Session (Terraza Chapinero)",
-            code: "NOCTUA2X1",
-            discount: "2x1 en Entradas Early Bird",
-            venue: "Terraza 85 - Calle 85"
-        }
-    },
-    {
-        id: "dj_camilo",
-        name: "CAMILO B2B",
-        genre: "Hardgroove",
-        bpm: 142,
-        color: "#ffaa00",
-        colorHex: 0xffaa00,
-        worldColor: 0x120c03,
-        groundColor: 0x221706,
-        neonColor: 0xffbb00,
-        synthFreq: 73.4, // D2
-        promo: {
-            title: "BOGOTÁ HARDGROOVE VOL. 3",
-            code: "GROOVE20",
-            discount: "20% OFF Merchandising Oficial",
-            venue: "Radio Estrella - Calle 64"
-        }
-    },
-    {
-        id: "dj_valeria",
-        name: "VALERIA NEON",
-        genre: "Acid & Minimal",
-        bpm: 132,
-        color: "#00ff66",
-        colorHex: 0x00ff66,
-        worldColor: 0x031206,
-        groundColor: 0x08240d,
-        neonColor: 0x39ff14,
-        synthFreq: 49, // G1
-        promo: {
-            title: "VALERIA — Acid Night (Zona Rosa)",
-            code: "ACIDNIGHT",
-            discount: "Coctel de bienvenida gratis",
-            venue: "Kaputt Club - Calle 72"
-        }
-    },
-    {
-        id: "dj_bogota_allstars",
-        name: "ZONA T COLECTIVO",
-        genre: "Underground House",
-        bpm: 128,
-        color: "#b000ff",
-        colorHex: 0xb000ff,
-        worldColor: 0x0d0317,
-        groundColor: 0x1f0730,
-        neonColor: 0xd400ff,
-        synthFreq: 58.27, // A#1
-        promo: {
-            title: "FESTIVAL ZONA T 2026 — Preventa Exclusiva",
-            code: "FESTZONAT",
-            discount: "Pase VIP con 25% descuento",
-            venue: "Chamorro City Hall - Autonorte"
-        }
-    },
-    {
-        id: "dj_letal",
-        name: "LETAL",
-        genre: "Violin Techno",
-        bpm: 130,
-        color: "#cc00ff",
-        colorHex: 0xcc00ff,
-        worldColor: 0x0a0118,
-        groundColor: 0x180030,
-        neonColor: 0xcc00ff,
-        avatar: "assets/avatars/dj_letal.jpg",
-        synthFreq: 82.4, // E2
-        promo: {
-            title: "LETAL — Violin Techno Night (Zona T)",
-            code: "LETAL20",
-            discount: "20% OFF en la puerta",
-            venue: "Club Bling Bling - Zona Rosa"
-        }
-    },
-    {
-        id: "dj_nunez",
-        name: "DJ NUÑEZ",
-        genre: "Tech House / Groove",
-        bpm: 128,
-        color: "#ff5500",
-        colorHex: 0xff5500,
-        worldColor: 0x180800,
-        groundColor: 0x280e00,
-        neonColor: 0xff6600,
-        avatar: "assets/avatars/dj_nunez.jpg",
-        synthFreq: 61.74, // B1
-        promo: {
-            title: "DJ NUÑEZ — El Toro en Llamas (Baum Club)",
-            code: "TORO15",
-            discount: "15% OFF + Stomp Pass",
-            venue: "Baum Club - Calle 33"
-        }
-    },
-    {
-        id: "dj_tatan",
-        name: "DJ TATAN",
-        genre: "Peak Time Techno",
-        bpm: 134,
-        color: "#00ff88",
-        colorHex: 0x00ff88,
-        worldColor: 0x00140a,
-        groundColor: 0x002613,
-        neonColor: 0x00ff88,
-        avatar: "assets/avatars/dj_tatan.jpg",
-        synthFreq: 51.91, // G#1
-        promo: {
-            title: "DJ TATAN — Residencia Oficial (Club Octava)",
-            code: "TATANOCTAVA",
-            discount: "20% OFF en Cover y Mesa",
-            venue: "Club Octava - Chapinero"
-        }
-    },
-    {
-        id: "dj_molecular",
-        name: "DJ MOLECULAR",
-        genre: "Psy-Techno & Industrial",
-        bpm: 136,
-        color: "#00e5ff",
-        colorHex: 0x00e5ff,
-        worldColor: 0x000e18,
-        groundColor: 0x001c2e,
-        neonColor: 0x00e5ff,
-        avatar: "molecular_avatar.jpg",
-        synthFreq: 46.25, // F#1
-        promo: {
-            title: "MOLECULAR — Quantum Techno Night",
-            code: "MOLECULAR_VIP",
-            discount: "Pase VIP Backstage",
-            venue: "Radio Berlin - Chapinero"
-        }
-    },
-    {
-        id: "dj_sthep",
-        name: "DJ STHEP",
-        genre: "Melodic Techno & Vocal",
-        bpm: 126,
-        color: "#ff007f",
-        colorHex: 0xff007f,
-        worldColor: 0x160010,
-        groundColor: 0x2d0022,
-        neonColor: 0xff007f,
-        isFemale: true,
-        synthFreq: 69.3, // C#2
-        promo: {
-            title: "DJ STHEP — Melodic Horizon Tour",
-            code: "STHEP25",
-            discount: "25% OFF en Boletería",
-            venue: "Kaputt Club - Calle 72"
-        }
-    },
-    {
-        id: "dj_camila_leuro",
-        name: "CAMILA LEURO",
-        genre: "Deep Minimal & Hypnotic",
-        bpm: 124,
-        color: "#a855f7",
-        colorHex: 0xa855f7,
-        worldColor: 0x0e0018,
-        groundColor: 0x1e0033,
-        neonColor: 0xc084fc,
-        isFemale: true,
-        synthFreq: 77.78, // D#2
-        promo: {
-            title: "CAMILA LEURO — Hypnotic Frequencies",
-            code: "CAMILAVIP",
-            discount: "20% OFF + Cóctel de Cortesía",
-            venue: "Vlak - Parque 93"
+// --- 1. DATA-DRIVEN CONFIGURATION ---
+// El roster NO vive aqui. Fuente unica de verdad: /data/djs/roster.json (schema: data/djs/dj_schema.json).
+// Para agregar o editar un DJ, edita ese JSON; el web-runner y Unity leen el mismo archivo.
+const ROSTER_URLS = ["/data/djs/roster.json", "../data/djs/roster.json", "data/djs/roster.json"];
+
+let DJS = [];
+
+const hexToInt = (h, fallback) => {
+    if (typeof h !== "string") return fallback;
+    const n = parseInt(h.replace("#", ""), 16);
+    return Number.isNaN(n) ? fallback : n;
+};
+
+/** Adapta un DJ del schema canonico a la forma plana que consume el motor 3D. */
+function adaptDJ(dj) {
+    const vi = dj.visualIdentity || {};
+    const world = dj.world || {};
+    const music = dj.music || {};
+    const promo = (dj.promotions || [])[0] || null;
+    return {
+        id: dj.id,
+        name: dj.name,
+        genre: dj.genre,
+        bpm: music.bpm || 128,
+        color: vi.primaryColor || "#00ffff",
+        colorHex: hexToInt(vi.primaryColor, 0x00ffff),
+        worldColor: hexToInt(world.fogColor, 0x050510),
+        groundColor: hexToInt(world.groundColor, 0x0a0a18),
+        neonColor: hexToInt(vi.accentColor, 0x00ffff),
+        avatar: (dj.character || {}).avatar || null,
+        isFemale: !!(dj.character || {}).isFemale,
+        synthFreq: music.synthFreq || 55,
+        ability: (dj.stats || {}).abilityName || null,
+        abilityDescription: (dj.stats || {}).abilityDescription || null,
+        residencies: dj.residencies || [],
+        promo: promo ? {
+            title: promo.title,
+            code: promo.code,
+            discount: promo.discount,
+            venue: promo.venue
+        } : null
+    };
+}
+
+/** Carga el roster canonico. Prueba varias rutas para funcionar servido o embebido. */
+async function loadRoster() {
+    // Roster embebido: la build offline lo trae dentro, sin fetch ni servidor.
+    // Es el fallback duro para demos en un club sin red.
+    if (typeof window !== "undefined" && window.__ZONAT_ROSTER__) {
+        const embedded = window.__ZONAT_ROSTER__;
+        const embList = Array.isArray(embedded) ? embedded : embedded.djs;
+        if (Array.isArray(embList) && embList.length > 0) {
+            console.log("[ZonaT] Roster embebido (" + embList.length + " DJs)");
+            return embList.map(adaptDJ);
         }
     }
-];
+
+    let lastError = null;
+    for (const url of ROSTER_URLS) {
+        try {
+            const res = await fetch(url, { cache: "no-cache" });
+            if (!res.ok) { lastError = new Error(url + " -> HTTP " + res.status); continue; }
+            const data = await res.json();
+            const list = Array.isArray(data) ? data : data.djs;
+            if (!Array.isArray(list) || list.length === 0) {
+                lastError = new Error(url + " -> roster vacio");
+                continue;
+            }
+            console.log("[ZonaT] Roster cargado desde " + url + " (" + list.length + " DJs)");
+            return list.map(adaptDJ);
+        } catch (err) {
+            lastError = err;
+        }
+    }
+    throw lastError || new Error("No se pudo cargar el roster");
+}
 
 // --- 2. AUDIO SYNTHESIZER: 4-LAYER REALTIME STEMS ---
 class AudioEngine {
@@ -1137,6 +1005,7 @@ class ZonaTRunnerGame {
             requestAnimationFrame(animate);
             const dt = Math.min((now - lastTime) / 1000, 0.1);
             lastTime = now;
+            this.pollGamepad();
             if (!this.isPaused) {
                 this.update(dt);
             }
@@ -2371,26 +2240,89 @@ class ZonaTRunnerGame {
         }
     }
 
+    /**
+     * Gamepad (PC / mando). Se sondea cada frame porque la Gamepad API no emite eventos
+     * de botones. Guarda el estado previo para disparar solo en el flanco de subida.
+     */
+    pollGamepad() {
+        if (!navigator.getGamepads) return;
+        const pads = navigator.getGamepads();
+        let pad = null;
+        for (const p of pads) { if (p && p.connected) { pad = p; break; } }
+        if (!pad) { this.gamepadPrev = null; return; }
+
+        const AXIS_DEAD = 0.55;
+        const lx = pad.axes[0] || 0;
+        const ly = pad.axes[1] || 0;
+        const btn = (i) => !!(pad.buttons[i] && pad.buttons[i].pressed);
+
+        const now = {
+            left:  btn(14) || lx < -AXIS_DEAD,
+            right: btn(15) || lx > AXIS_DEAD,
+            up:    btn(12) || btn(0) || ly < -AXIS_DEAD,   // D-pad arriba, A/Cross, stick arriba
+            down:  btn(13) || btn(1) || ly > AXIS_DEAD,    // D-pad abajo, B/Circle, stick abajo
+            pause: btn(9) || btn(8)                        // Start / Select
+        };
+        const prev = this.gamepadPrev || { left: false, right: false, up: false, down: false, pause: false };
+        const pressed = (key) => now[key] && !prev[key];
+
+        if (pressed("pause")) this.togglePause();
+        if (!this.isPlaying) {
+            if (pressed("up")) {
+                const b = document.getElementById("btn-restart");
+                const restartVisible = b && !b.closest(".hidden");
+                (restartVisible ? b : document.getElementById("btn-start-run")).click();
+            }
+        } else if (!this.isPaused) {
+            if (pressed("left")) this.moveLeft();
+            if (pressed("right")) this.moveRight();
+            if (pressed("up")) this.jump();
+            if (pressed("down")) this.slide();
+        }
+        this.gamepadPrev = now;
+    }
+
     bindEvents() {
+        window.addEventListener("gamepadconnected", (e) => {
+            console.log("[ZonaT] Mando conectado:", e.gamepad.id);
+        });
+
         window.addEventListener("resize", () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Keyboard Controls
+        // Teclado (PC) — ver docs/PLATAFORMAS_Y_CONTROLES.md
+        const SCROLL_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "];
         window.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" || e.key === "p" || e.key === "P") {
+            if (e.repeat) return;
+            // El navegador hace scroll con flechas y espacio: se bloquea para no mover la pagina.
+            if (SCROLL_KEYS.includes(e.key)) e.preventDefault();
+
+            const k = e.key.toLowerCase();
+
+            if (e.key === "Escape" || k === "p") {
                 this.togglePause();
                 return;
             }
-            if (!this.isPlaying || this.isPaused) return;
 
-            if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") this.moveLeft();
-            else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") this.moveRight();
-            else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W" || e.key === " ") this.jump();
-            else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") this.slide();
-        });
+            // Fuera de partida: Enter/Espacio arranca, R reinicia.
+            if (!this.isPlaying) {
+                if (e.key === "Enter" || e.key === " " || k === "r") {
+                    const btn = document.getElementById("btn-restart");
+                    const restartVisible = btn && !btn.closest(".hidden");
+                    (restartVisible ? btn : document.getElementById("btn-start-run")).click();
+                }
+                return;
+            }
+            if (this.isPaused) return;
+
+            if (e.key === "ArrowLeft" || k === "a") this.moveLeft();
+            else if (e.key === "ArrowRight" || k === "d") this.moveRight();
+            else if (e.key === "ArrowUp" || k === "w" || e.key === " ") this.jump();
+            else if (e.key === "ArrowDown" || k === "s") this.slide();
+        }, { passive: false });
 
         // Touch Gestures
         window.addEventListener("touchstart", (e) => {
@@ -2415,6 +2347,19 @@ class ZonaTRunnerGame {
 }
 
 // Start Game
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
+    try {
+        DJS = await loadRoster();
+    } catch (err) {
+        console.error("[ZonaT] Error cargando el roster:", err);
+        document.body.insertAdjacentHTML("afterbegin",
+            '<div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;' +
+            'justify-content:center;background:#08040f;color:#ff0055;font-family:system-ui,sans-serif;' +
+            'text-align:center;padding:2rem;line-height:1.6">' +
+            '<div><h2>No se pudo cargar el roster de DJs</h2>' +
+            '<p style="color:#9aa">Se esperaba <code>/data/djs/roster.json</code>.<br>' +
+            'Arranca el juego con <code>node server.js</code> desde la raiz del repo.</p></div></div>');
+        return;
+    }
     new ZonaTRunnerGame();
 });

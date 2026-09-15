@@ -1,0 +1,55 @@
+{
+  "$comment": "Personajes DJ jugables. Generado por blender_map/build_dj_characters.py.",
+  "version": "1.0.0",
+  "generator": "Blender 5.0.1 (bpy headless)",
+  "convention": {
+    "originAt": "pies",
+    "heightMeters": 1.8,
+    "facing": "+Y",
+    "maxWidthMeters": 0.95,
+    "pose": "zancada de carrera (sin esqueleto todavia)"
+  },
+  "characters": [
+    {
+      "id": "dj_letal",
+      "name": "LETAL",
+      "glb": "track_kit/CHAR_LETAL.glb",
+      "fbx": "track_kit/CHAR_LETAL.fbx",
+      "triangles": 1664,
+      "accentColor": "#cc00ff",
+      "signature": "violin",
+      "note": "Latex negro, violin neon violeta, ojo turco, mechon rojo (IG @letal._)."
+    },
+    {
+      "id": "dj_nunez",
+      "name": "NUNEZ",
+      "glb": "track_kit/CHAR_NUNEZ.glb",
+      "fbx": "track_kit/CHAR_NUNEZ.fbx",
+      "triangles": 1500,
+      "accentColor": "#ff5500",
+      "signature": "flame_foot",
+      "note": "Hoodie oversize oscuro, aura de fuego ambar, pisada derecha en llamas."
+    },
+    {
+      "id": "dj_tatan",
+      "name": "TATAN",
+      "glb": "track_kit/CHAR_TATAN.glb",
+      "fbx": "track_kit/CHAR_TATAN.fbx",
+      "triangles": 1560,
+      "accentColor": "#00ff88",
+      "signature": "circuits",
+      "note": "Chaqueta tactica negra mate con circuitos bioluminiscentes verdes."
+    },
+    {
+      "id": "dj_fresar",
+      "name": "FRESAR",
+      "glb": "track_kit/CHAR_FRESAR.glb",
+      "fbx": "track_kit/CHAR_FRESAR.fbx",
+      "triangles": 1772,
+      "accentColor": "#ff0055",
+      "signature": "visor",
+      "note": "Visor LED carmesi, chaleco tactico, emblema de fresa (IG @fresar)."
+    }
+  ],
+  "totalTriangles": 6496
+}

@@ -67,6 +67,14 @@ sysinfo.txt
 # Keep packages-lock.json in version control
 !/[Pp]ackages/packages-lock.json
 
+# ---- Contenido generado (fuente de verdad: data/ en la raiz del repo) ----
+# ContentSync.cs lo regenera en cada build. Ver docs/ENGINE_STRATEGY.md.
+ZonaTRunner/Assets/StreamingAssets/data/
+ZonaTRunner/Assets/StreamingAssets/data.meta
+
+# ---- Demo offline (generada por tools/build_offline_demo.js, embebe roster.json) ----
+web-runner/offline/
+
 # ---- Environment / Secrets ----
 *.env
 *.env.local

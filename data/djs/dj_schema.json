@@ -213,11 +213,25 @@
         },
         "specialAbility": {
           "type": "string",
-          "enum": ["none", "bass_drop", "vinyl_shield", "bpm_boost", "crowd_magnet", "remix_time"],
+          "enum": ["none", "bass_drop", "vinyl_shield", "bpm_boost", "crowd_magnet", "remix_time", "stomp_flame", "electro_bow", "shield_pulse", "overdrive_visor"],
           "default": "none",
           "description": "Habilidad especial del DJ"
+        },
+        "abilityName": {
+          "type": ["string", "null"],
+          "description": "Nombre comercial de la habilidad, mostrado en UI (e.g. '1-2-3-4 Stomp Flame')"
+        },
+        "abilityDescription": {
+          "type": ["string", "null"],
+          "description": "Descripcion de la habilidad para la pantalla de seleccion"
         }
       }
+    },
+
+    "residencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Clubes donde el DJ tiene residencia real"
     },
 
     "obstacles": {
