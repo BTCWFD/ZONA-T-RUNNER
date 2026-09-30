@@ -33,12 +33,19 @@ const MIME_TYPES = {
 
 /** Resuelve la URL a un archivo, bloqueando path traversal fuera de los directorios servidos. */
 function resolvePath(cleanUrl) {
-    const decoded = decodeURIComponent(cleanUrl);
+    let decoded = decodeURIComponent(cleanUrl);
     if (decoded.startsWith('/data/')) {
         const target = path.join(DATA_DIR, decoded.slice('/data/'.length));
         return target.startsWith(DATA_DIR + path.sep) ? target : null;
     }
-    const target = path.join(PUBLIC_DIR, decoded === '/' ? 'index.html' : decoded);
+    if (decoded === '/' || decoded === '') {
+        decoded = 'index.html';
+    } else if (decoded === '/portal' || decoded === '/website') {
+        decoded = 'portal.html';
+    } else if (decoded === '/game') {
+        decoded = 'index.html';
+    }
+    const target = path.join(PUBLIC_DIR, decoded.startsWith('/') ? decoded.slice(1) : decoded);
     return target.startsWith(PUBLIC_DIR) ? target : null;
 }
 

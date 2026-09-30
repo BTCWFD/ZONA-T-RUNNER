@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
@@ -83,7 +83,7 @@ public class GameFlowSetup
 
         Camera cam = Camera.main;
         if (cam != null) {
-            cam.gameObject.AddComponent<ZonaTRunner.Core.CameraFollow>();
+            cam.gameObject.AddComponent<ZonaTRunner.World.CameraFollow>();
         }
 
         GameObject spawnerObj = new GameObject("TrackSpawner");

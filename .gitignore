@@ -80,3 +80,8 @@ web-runner/offline/
 *.env.local
 .env.*
 secrets/
+
+# ---- Local logs and archives ----
+*.zip
+*_log.txt
+unity_batch_log.txt

@@ -1282,6 +1282,269 @@ class ZonaTRunnerGame {
             this.player.add(rightLegGroup);
             this.limbs.rightLeg = rightLegGroup;
 
+        } else if (this.selectedDJ.id === "dj_tatan") {
+            // === 💚 DJ TATÁN / CALVIN PARRA (Club Octava resident, tech bomber jacket with emerald bioluminescent circuits) ===
+            const jacketMat = new THREE.MeshStandardMaterial({
+                color: 0x121722,
+                roughness: 0.35,
+                metalness: 0.35
+            });
+            const emeraldCircuitMat = new THREE.MeshBasicMaterial({
+                color: 0x00ff66
+            });
+            const cyanAccentMat = new THREE.MeshBasicMaterial({
+                color: 0x00f3ff
+            });
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0xd8a280,
+                roughness: 0.6,
+                metalness: 0.05
+            });
+            const darkPantsMat = new THREE.MeshStandardMaterial({
+                color: 0x0c0e16,
+                roughness: 0.5
+            });
+
+            this.playerMesh = new THREE.Group();
+            this.playerMesh.position.y = 1.35;
+            this.player.add(this.playerMesh);
+
+            // 1. Torso: Athletic Bomber Jacket
+            const torsoGeo = new THREE.BoxGeometry(0.88, 1.05, 0.48);
+            const torso = new THREE.Mesh(torsoGeo, jacketMat);
+            torso.position.y = 0.15;
+            this.playerMesh.add(torso);
+
+            // Central zipper accent (cyan glow)
+            const zipGeo = new THREE.BoxGeometry(0.06, 0.95, 0.04);
+            const zip = new THREE.Mesh(zipGeo, cyanAccentMat);
+            zip.position.set(0, 0.15, 0.25);
+            this.playerMesh.add(zip);
+
+            // Bioluminescent spine circuit lines on the back
+            const spineCircuitGeo = new THREE.BoxGeometry(0.12, 0.85, 0.04);
+            const spineCircuit = new THREE.Mesh(spineCircuitGeo, emeraldCircuitMat);
+            spineCircuit.position.set(0, 0.15, -0.25);
+            this.playerMesh.add(spineCircuit);
+
+            // Octava Resident Hexagonal Glyph on upper back
+            const hexGlyphGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.04, 6);
+            const hexGlyph = new THREE.Mesh(hexGlyphGeo, emeraldCircuitMat);
+            hexGlyph.rotation.x = Math.PI / 2;
+            hexGlyph.position.set(0, 0.38, -0.25);
+            this.playerMesh.add(hexGlyph);
+
+            // 2. Head with short fade hair
+            const headGeo = new THREE.BoxGeometry(0.48, 0.52, 0.46);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 0.92, 0.02);
+            this.playerMesh.add(head);
+
+            const hairGeo = new THREE.BoxGeometry(0.5, 0.2, 0.48);
+            const hairMat = new THREE.MeshStandardMaterial({ color: 0x221a14, roughness: 0.8 });
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.set(0, 1.14, 0);
+            this.playerMesh.add(hair);
+
+            // 3. Cyber Rave Sunglasses (emerald polarized lens)
+            const shadesGeo = new THREE.BoxGeometry(0.44, 0.12, 0.15);
+            const shades = new THREE.Mesh(shadesGeo, emeraldCircuitMat);
+            shades.position.set(0, 0.95, 0.25);
+            this.playerMesh.add(shades);
+
+            // 4. Monitoring DJ Headphones resting around neck
+            const phonesCollarGeo = new THREE.TorusGeometry(0.24, 0.04, 8, 16);
+            const phonesCollar = new THREE.Mesh(phonesCollarGeo, cyanAccentMat);
+            phonesCollar.rotation.x = Math.PI / 2;
+            phonesCollar.position.set(0, 0.65, 0.02);
+            this.playerMesh.add(phonesCollar);
+
+            const earCupGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 12);
+            const leftCup = new THREE.Mesh(earCupGeo, emeraldCircuitMat);
+            leftCup.position.set(-0.25, 0.66, 0.05);
+            leftCup.rotation.z = 0.4;
+            this.playerMesh.add(leftCup);
+
+            const rightCup = new THREE.Mesh(earCupGeo, emeraldCircuitMat);
+            rightCup.position.set(0.25, 0.66, 0.05);
+            rightCup.rotation.z = -0.4;
+            this.playerMesh.add(rightCup);
+
+            // 5. Arms with Circuit Trim
+            const armGeo = new THREE.BoxGeometry(0.24, 0.72, 0.24);
+            const leftArm = new THREE.Mesh(armGeo, jacketMat);
+            leftArm.position.set(-0.58, 1.35, 0);
+            const leftStripeGeo = new THREE.BoxGeometry(0.04, 0.6, 0.25);
+            const leftStripe = new THREE.Mesh(leftStripeGeo, emeraldCircuitMat);
+            leftStripe.position.set(-0.1, 0, 0);
+            leftArm.add(leftStripe);
+            this.player.add(leftArm);
+            this.limbs.leftArm = leftArm;
+
+            const rightArm = new THREE.Mesh(armGeo, jacketMat);
+            rightArm.position.set(0.58, 1.35, 0);
+            const rightStripe = new THREE.Mesh(leftStripeGeo, emeraldCircuitMat);
+            rightStripe.position.set(0.1, 0, 0);
+            rightArm.add(rightStripe);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+
+            // 6. Legs & High-top Sneakers with Neon Green Soles
+            const legGeo = new THREE.BoxGeometry(0.28, 0.8, 0.28);
+            const leftLeg = new THREE.Mesh(legGeo, darkPantsMat);
+            leftLeg.position.set(-0.24, 0.4, 0);
+            const leftSoleGeo = new THREE.BoxGeometry(0.29, 0.08, 0.36);
+            const leftSole = new THREE.Mesh(leftSoleGeo, emeraldCircuitMat);
+            leftSole.position.set(0, -0.38, 0.03);
+            leftLeg.add(leftSole);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            const rightLeg = new THREE.Mesh(legGeo, darkPantsMat);
+            rightLeg.position.set(0.24, 0.4, 0);
+            const rightSole = new THREE.Mesh(leftSoleGeo, emeraldCircuitMat);
+            rightSole.position.set(0, -0.38, 0.03);
+            rightLeg.add(rightSole);
+            this.player.add(rightLeg);
+            this.limbs.rightLeg = rightLeg;
+
+            // Emerald Ambient Light
+            this.tatanLight = new THREE.PointLight(0x00ff66, 1.8, 5.0);
+            this.tatanLight.position.set(0, 0.8, -0.3);
+            this.playerMesh.add(this.tatanLight);
+
+        } else if (this.selectedDJ.id === "dj_fresar") {
+            // === 🔴 DJ FRESAR: INDUSTRIAL TECHNO CYBORG (Overdrive Visor, Tactical Vest with Strawberry Emblem) ===
+            const vestMat = new THREE.MeshStandardMaterial({
+                color: 0x111118,
+                roughness: 0.65,
+                metalness: 0.2
+            });
+            const crimsonLedMat = new THREE.MeshBasicMaterial({
+                color: 0xff0044
+            });
+            const strawberryMat = new THREE.MeshBasicMaterial({
+                color: 0xff0066
+            });
+            const cyberArmMat = new THREE.MeshStandardMaterial({
+                color: 0x475569,
+                roughness: 0.2,
+                metalness: 0.9
+            });
+            const skinMat = new THREE.MeshStandardMaterial({
+                color: 0xd69a7c,
+                roughness: 0.6
+            });
+            const combatPantsMat = new THREE.MeshStandardMaterial({
+                color: 0x090a0f,
+                roughness: 0.7
+            });
+
+            this.playerMesh = new THREE.Group();
+            this.playerMesh.position.y = 1.35;
+            this.player.add(this.playerMesh);
+
+            // 1. Tactical Combat Vest
+            const vestGeo = new THREE.BoxGeometry(0.92, 1.08, 0.52);
+            const vest = new THREE.Mesh(vestGeo, vestMat);
+            vest.position.y = 0.15;
+            this.playerMesh.add(vest);
+
+            // Neon Strawberry Insignia on chest
+            const strawberryGeo = new THREE.ConeGeometry(0.15, 0.22, 6);
+            const strawberry = new THREE.Mesh(strawberryGeo, strawberryMat);
+            strawberry.rotation.x = Math.PI;
+            strawberry.position.set(0.2, 0.35, 0.28);
+            this.playerMesh.add(strawberry);
+
+            // Strawberry green leaf top
+            const leafGeo = new THREE.BoxGeometry(0.12, 0.04, 0.06);
+            const leaf = new THREE.Mesh(leafGeo, new THREE.MeshBasicMaterial({ color: 0x00ff66 }));
+            leaf.position.set(0.2, 0.46, 0.28);
+            this.playerMesh.add(leaf);
+
+            // Twin Overclock Exhaust Vents on upper back
+            const ventGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 10);
+            const leftVent = new THREE.Mesh(ventGeo, crimsonLedMat);
+            leftVent.rotation.x = 0.3;
+            leftVent.position.set(-0.25, 0.45, -0.28);
+            this.playerMesh.add(leftVent);
+
+            const rightVent = new THREE.Mesh(ventGeo, crimsonLedMat);
+            rightVent.rotation.x = 0.3;
+            rightVent.position.set(0.25, 0.45, -0.28);
+            this.playerMesh.add(rightVent);
+
+            // 2. Head with Tactical Military Crop
+            const headGeo = new THREE.BoxGeometry(0.48, 0.52, 0.46);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.position.set(0, 0.92, 0.02);
+            this.playerMesh.add(head);
+
+            // 3. Wide Crimson Audio Spectrum Visor (Segmented LED Bars)
+            const visorFrameGeo = new THREE.BoxGeometry(0.52, 0.18, 0.2);
+            const visorFrame = new THREE.Mesh(visorFrameGeo, new THREE.MeshStandardMaterial({ color: 0x050508, metalness: 0.8 }));
+            visorFrame.position.set(0, 0.94, 0.24);
+            this.playerMesh.add(visorFrame);
+
+            // 5 Audio spectrum LED blocks inside the visor
+            for (let b = -2; b <= 2; b++) {
+                const barGeo = new THREE.BoxGeometry(0.06, 0.12, 0.04);
+                const bar = new THREE.Mesh(barGeo, crimsonLedMat);
+                bar.position.set(b * 0.09, 0.94, 0.34);
+                this.playerMesh.add(bar);
+            }
+
+            // 4. Left Arm: Biomechanical Prosthetic Arm
+            const cyberArmGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.72, 12);
+            const leftCyberArm = new THREE.Mesh(cyberArmGeo, cyberArmMat);
+            leftCyberArm.position.set(-0.6, 1.35, 0);
+
+            // Exposed crimson conduits around cyber arm
+            const conduitGeo = new THREE.TorusGeometry(0.13, 0.02, 6, 12);
+            for (let cIdx = 0; cIdx < 3; cIdx++) {
+                const conduit = new THREE.Mesh(conduitGeo, crimsonLedMat);
+                conduit.rotation.x = Math.PI / 2;
+                conduit.position.y = (cIdx - 1) * 0.2;
+                leftCyberArm.add(conduit);
+            }
+            this.player.add(leftCyberArm);
+            this.limbs.leftArm = leftCyberArm;
+
+            // 5. Right Arm: Tactical Sleeve & BPM Display
+            const armGeo = new THREE.BoxGeometry(0.24, 0.72, 0.24);
+            const rightArm = new THREE.Mesh(armGeo, vestMat);
+            rightArm.position.set(0.58, 1.35, 0);
+            const watchGeo = new THREE.BoxGeometry(0.14, 0.1, 0.26);
+            const watch = new THREE.Mesh(watchGeo, crimsonLedMat);
+            watch.position.set(0.08, -0.15, 0);
+            rightArm.add(watch);
+            this.player.add(rightArm);
+            this.limbs.rightArm = rightArm;
+
+            // 6. Combat Legs with Steel-toe Boots
+            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
+            const leftLeg = new THREE.Mesh(legGeo, combatPantsMat);
+            leftLeg.position.set(-0.25, 0.4, 0);
+            const bootStripe = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.06, 0.32), crimsonLedMat);
+            bootStripe.position.set(0, -0.15, 0);
+            leftLeg.add(bootStripe);
+            this.player.add(leftLeg);
+            this.limbs.leftLeg = leftLeg;
+
+            const rightLeg = new THREE.Mesh(legGeo, combatPantsMat);
+            rightLeg.position.set(0.25, 0.4, 0);
+            const rightBootStripe = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.06, 0.32), crimsonLedMat);
+            rightBootStripe.position.set(0, -0.15, 0);
+            rightLeg.add(rightBootStripe);
+            this.player.add(rightLeg);
+            this.limbs.rightLeg = rightLeg;
+
+            // Crimson Visor Light
+            this.fresarLight = new THREE.PointLight(0xff0044, 2.2, 5.5);
+            this.fresarLight.position.set(0, 0.95, 0.5);
+            this.playerMesh.add(this.fresarLight);
+
         } else if (this.selectedDJ.isFemale) {
             // === 🎀 FEMALE DJ CYBER-RUNNER (DJ STHEP & CAMILA LEURO) ===
             const suitMat = new THREE.MeshStandardMaterial({
@@ -1889,6 +2152,12 @@ class ZonaTRunnerGame {
         this.feverTimer = 0;
         this.audio.setFever(false);
 
+        // Character Starting Special Ability
+        if (this.selectedDJ && this.selectedDJ.id === "dj_tatan") {
+            this.hasShield = true;
+            this.shieldMesh.visible = true;
+        }
+
         this.player.position.set(0, 0, 0);
 
         document.getElementById("screen-start").classList.add("hidden");
@@ -1967,7 +2236,11 @@ class ZonaTRunnerGame {
         this.score += this.speed * dt * 1.5 * multiplier;
         
         // Dynamic Difficulty: increase max speed as distance grows
-        this.maxSpeed = 52 + (this.distance / 1000); 
+        let calculatedMax = 52 + (this.distance / 1000);
+        if (this.selectedDJ && this.selectedDJ.id === "dj_fresar" && this.feverTimer > 0) {
+            calculatedMax *= 1.15; // 15% Overdrive Visor bonus!
+        }
+        this.maxSpeed = calculatedMax;
 
         if (this.speed < this.maxSpeed) {
             this.speed += 0.35 * dt; // Faster acceleration
@@ -2050,9 +2323,34 @@ class ZonaTRunnerGame {
             this.flameLight.intensity = flamePulse;
             if (beatIndex === 4) {
                 this.flameLight.color.setHex(0xffcc00); // 4th beat explosion!
+                if (beatSub < 0.25) {
+                    this.obstacles.forEach(obs => {
+                        if (obs.type === "low" && !obs.destroyed) {
+                            const distZ = obs.mesh.position.z - this.player.position.z;
+                            const distX = Math.abs(obs.mesh.position.x - this.player.position.x);
+                            if (distZ > 0 && distZ < 7.0 && distX < 1.8) {
+                                obs.destroyed = true;
+                                obs.mesh.visible = false;
+                                this.createExplosion(obs.mesh.position, 0xff7700);
+                            }
+                        }
+                    });
+                }
             } else {
                 this.flameLight.color.setHex(0xff4400);
             }
+        }
+
+        // 💚 DJ TATÁN / CALVIN PARRA: OCTAVA PULSE LIGHTS
+        if (this.selectedDJ.id === "dj_tatan" && this.tatanLight) {
+            const beatPulse = (Math.sin(this.runAnimTime * 2.5) + 1.0) * 0.9 + 0.8;
+            this.tatanLight.intensity = beatPulse;
+        }
+
+        // 🔴 DJ FRESAR: OVERDRIVE AUDIO SPECTRUM VISOR FLICKER
+        if (this.selectedDJ.id === "dj_fresar" && this.fresarLight) {
+            const visorFlicker = (Math.sin(this.runAnimTime * 4.5) + 1.0) * 1.1 + 1.0;
+            this.fresarLight.intensity = visorFlicker;
         }
 
         // Animated Obstacles (Subwoofers pulse)
@@ -2088,11 +2386,17 @@ class ZonaTRunnerGame {
             if (!c.collected) {
                 c.mesh.rotation.z += 4.5 * dt;
 
-                // Magnet effect: attract coins within 14 units
+                // Magnet effect: attract coins
+                let magnetRange = 0;
                 if (this.magnetTimer > 0) {
+                    magnetRange = (this.selectedDJ && this.selectedDJ.id === "dj_fresar" && this.feverTimer > 0) ? 22 : 14;
+                } else if (this.selectedDJ && this.selectedDJ.id === "dj_letal") {
+                    magnetRange = 8.5; // Passive permanent electromagnetic violin pull!
+                }
+                if (magnetRange > 0) {
                     const dist = c.mesh.position.distanceTo(this.player.position);
-                    if (dist < 14) {
-                        c.mesh.position.lerp(this.player.position, 12 * dt);
+                    if (dist < magnetRange) {
+                        c.mesh.position.lerp(this.player.position, 14 * dt);
                     }
                 }
             }

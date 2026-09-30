@@ -25,6 +25,7 @@ namespace ZonaTRunner.Editor
             camObj.transform.rotation = Quaternion.Euler(15f, 0f, 0f);
             camObj.tag = "MainCamera";
             camObj.AddComponent<AudioListener>();
+            camObj.AddComponent<ZonaTRunner.World.CameraFollow>();
 
             // --- DIRECTIONAL LIGHT ---
             GameObject lightObj = new GameObject("Directional Light");
