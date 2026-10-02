@@ -1,0 +1,5 @@
+# Deploy branch only: GitHub Pages cannot serve Git LFS objects,
+# so images under web-runner/ are stored as regular blobs here.
+*.jpg -filter -diff -merge -text
+*.jpeg -filter -diff -merge -text
+*.png -filter -diff -merge -text
