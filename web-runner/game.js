@@ -2266,7 +2266,7 @@ class ZonaTRunnerGame {
             this.camera.position.x += (Math.random() - 0.5) * amt;
             this.camera.position.y += (Math.random() - 0.5) * amt;
         }
-        this.camera.lookAt(this.player.position.x * 0.2, 1.5, this.player.position.z + 22);
+        this.camera.lookAt(this.player.position.x * 0.2, 0.4, this.player.position.z + 22);
         const targetFOV = 64 + (this.speed / this.maxSpeed) * 12;
         this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
         this.camera.updateProjectionMatrix();
