@@ -2,7 +2,7 @@
   "$comment": "FUENTE UNICA DE VERDAD del roster. No editar DJs en game.js ni en Unity: editar aqui.",
   "schema": "dj_schema.json",
   "version": "1.0.0",
-  "updatedAt": "2026-09-09",
+  "updatedAt": "2026-10-04",
   "djs": [
     {
       "id": "dj_fresar",
@@ -89,7 +89,7 @@
       "character": {
         "prefab": "characters/noctua",
         "displayName": "NOCTUA",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_noctua.jpg",
         "isFemale": false
       },
       "visualIdentity": {
@@ -157,7 +157,7 @@
       "character": {
         "prefab": "characters/camilo",
         "displayName": "CAMILO B2B",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_camilo.jpg",
         "isFemale": false
       },
       "visualIdentity": {
@@ -225,7 +225,7 @@
       "character": {
         "prefab": "characters/valeria",
         "displayName": "VALERIA NEON",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_valeria.jpg",
         "isFemale": false
       },
       "visualIdentity": {
@@ -293,7 +293,7 @@
       "character": {
         "prefab": "characters/bogota-allstars",
         "displayName": "ZONA T COLECTIVO",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_bogota_allstars.jpg",
         "isFemale": false
       },
       "visualIdentity": {
@@ -652,7 +652,7 @@
       "character": {
         "prefab": "characters/sthep",
         "displayName": "DJ STHEP",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_sthep.jpg",
         "isFemale": true
       },
       "visualIdentity": {
@@ -720,7 +720,7 @@
       "character": {
         "prefab": "characters/camila-leuro",
         "displayName": "CAMILA LEURO",
-        "avatar": null,
+        "avatar": "assets/avatars/dj_camila_leuro.jpg",
         "isFemale": true
       },
       "visualIdentity": {
