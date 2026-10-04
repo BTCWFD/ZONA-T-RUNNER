@@ -931,6 +931,12 @@ class ZonaTRunnerGame {
         const djListEl = document.getElementById("dj-list");
         djListEl.innerHTML = "";
 
+        // En pantallas tactiles no hay teclado: se explican los gestos.
+        const hint = document.getElementById("controls-hint");
+        if (hint && window.matchMedia && window.matchMedia("(pointer: coarse)").matches) {
+            hint.textContent = "CONTROLES: desliza ⬅️ ➡️ para cambiar de carril • ⬆️ saltar • ⬇️ deslizarte";
+        }
+
         DJS.forEach((dj, idx) => {
             const card = document.createElement("div");
             card.className = `dj-card ${idx === 0 ? "selected" : ""}`;
@@ -2255,9 +2261,12 @@ class ZonaTRunnerGame {
         // Camera Follow & Dynamic Speed FOV Warp (Image 2 Perspective)
         // Un poco mas atras y picada hacia abajo: el corredor queda completo por encima
         // del banner de promo en vez de perder las piernas detras de el.
-        this.camera.position.z = this.player.position.z - 6.3;
-        this.camera.position.x = this.player.position.x * 0.38;
-        this.camera.position.y = 3.75;
+        // En vertical (telefono) la camara se aleja, sube y abre el angulo para que
+        // sigan entrando los tres carriles en una pantalla angosta. k: 0 horizontal, 1 vertical.
+        const k = this.portraitFactor();
+        this.camera.position.z = this.player.position.z - (6.3 + 3.2 * k);
+        this.camera.position.x = this.player.position.x * (0.38 + 0.22 * k);
+        this.camera.position.y = 3.75 + 2.35 * k;
 
         // Screen Shake
         if (this.shakeTime > 0) {
@@ -2266,8 +2275,8 @@ class ZonaTRunnerGame {
             this.camera.position.x += (Math.random() - 0.5) * amt;
             this.camera.position.y += (Math.random() - 0.5) * amt;
         }
-        this.camera.lookAt(this.player.position.x * 0.2, 0.4, this.player.position.z + 22);
-        const targetFOV = 64 + (this.speed / this.maxSpeed) * 12;
+        this.camera.lookAt(this.player.position.x * (0.2 + 0.3 * k), 0.4 + 0.5 * k, this.player.position.z + 22 - 6 * k);
+        const targetFOV = 64 + 16 * k + (this.speed / this.maxSpeed) * (12 - 6 * k);
         this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
         this.camera.updateProjectionMatrix();
 
@@ -2403,17 +2412,26 @@ class ZonaTRunnerGame {
         }
     }
 
+    // 0 en pantallas horizontales, sube hasta 1 cuando la pantalla es vertical (telefono).
+    portraitFactor() {
+        const aspect = window.innerWidth / window.innerHeight;
+        return aspect >= 1 ? 0 : Math.min(1, (1 - aspect) / 0.45);
+    }
+
     // Input handlers
+    // La camara mira hacia +Z, asi que +X del mundo queda a la IZQUIERDA de la
+    // pantalla: el carril +1 es el izquierdo. (Antes estaba al reves y la flecha o
+    // el gesto hacia la derecha movian al corredor hacia la izquierda.)
     moveLeft() {
-        if (this.currentLane > -1) {
-            this.currentLane--;
+        if (this.currentLane < 1) {
+            this.currentLane++;
             this.targetLaneX = this.currentLane * this.laneDistance;
         }
     }
 
     moveRight() {
-        if (this.currentLane < 1) {
-            this.currentLane++;
+        if (this.currentLane > -1) {
+            this.currentLane--;
             this.targetLaneX = this.currentLane * this.laneDistance;
         }
     }
