@@ -325,6 +325,33 @@
             .banner-text { font-size: 0.68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         }
 
+        /* Menu de DJs: sin esto, en ventanas bajas el contenedor flex encogia
+           las tarjetas y la foto del avatar quedaba con altura 0. */
+        .dj-selector-wrap, .dj-card, .dj-avatar { flex-shrink: 0; }
+
+        /* Ventanas bajas: menu compacto para que quepan logo, avatares y boton. */
+        @media (max-height: 560px) {
+            #screen-start { justify-content: flex-start; overflow-y: auto; padding: 8px 0 12px; }
+            #screen-start > .title-container { margin-top: auto; margin-bottom: 6px; }
+            #screen-start > #btn-start-run { margin-bottom: auto; padding: 10px 34px; font-size: 1rem; margin-top: 4px; }
+            #screen-start .title-container > div:first-child { height: 44px !important; margin-bottom: 2px !important; }
+            #screen-start .subtitle { font-size: 0.7rem; margin-top: 0; }
+            #screen-start .high-score-tag { margin-top: 4px; padding: 2px 10px; font-size: 0.7rem; }
+            .dj-selector-wrap { margin: 4px 0; padding: 8px 10px; gap: 10px; }
+            .dj-card { width: 118px; padding: 6px 6px 8px 6px; }
+            .dj-avatar { width: 100px; height: 100px; margin-bottom: 5px; }
+            .dj-name { font-size: 0.85rem; margin-bottom: 2px; }
+            .dj-genre { font-size: 0.6rem; margin-bottom: 2px; }
+            .dj-bpm { font-size: 0.6rem; }
+            #screen-start .controls-hint { display: none; }
+        }
+        @media (max-height: 420px) {
+            #screen-start .title-container > div:first-child { height: 32px !important; }
+            #screen-start .subtitle { display: none; }
+            .dj-avatar { width: 84px; height: 84px; }
+            .dj-card { width: 102px; }
+        }
+
         /* Aviso de girar el telefono: el juego esta compuesto en horizontal. */
         #rotate-hint {
             display: none;
