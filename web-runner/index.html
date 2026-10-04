@@ -317,6 +317,14 @@
             .controls-hint { font-size: 0.65rem; bottom: 10px; }
         }
 
+        /* Ventanas bajas (telefono en horizontal, ventana pequena): la promo se
+           compacta a una sola linea pegada al borde para no tapar al corredor. */
+        @media (max-height: 560px) {
+            #in-game-banner { bottom: 6px; padding: 4px 12px; gap: 8px; border-radius: 8px; max-width: 72vw; }
+            .banner-tag { font-size: 0.55rem; padding: 2px 6px; white-space: nowrap; }
+            .banner-text { font-size: 0.68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        }
+
         /* Aviso de girar el telefono: el juego esta compuesto en horizontal. */
         #rotate-hint {
             display: none;
