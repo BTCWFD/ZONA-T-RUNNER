@@ -6,8 +6,12 @@
  * CREDIBILIDAD OPERATIVA, pero no existia ningun service worker en el repo.
  *
  * Estrategia:
- *  - App shell (html/js/three.js/imagenes) -> cache-first, se sirve instantaneo
- *    y sobrevive sin red una vez visitado una vez con conexion.
+ *  - Estaticos pesados (three.js, imagenes) -> cache-first, se sirven instantaneo
+ *    y sobreviven sin red una vez visitados con conexion.
+ *  - Codigo propio (index.html, game.js) -> network-first con fallback a cache:
+ *    un deploy nuevo se ve en la siguiente carga. Con cache-first los jugadores
+ *    que ya habian entrado se quedaban con el game.js viejo hasta que alguien
+ *    subiera CACHE_VERSION a mano.
  *  - /data/djs/roster.json -> network-first con fallback a cache: si hay red,
  *    siempre se usa el roster mas fresco (fuente unica de verdad); si no hay
  *    red, se sirve la ultima copia vista. Esto es DISTINTO del fallback
@@ -20,7 +24,7 @@
  * para forzar a los clientes a refrescar el cache viejo.
  */
 
-const CACHE_VERSION = 'zonat-shell-v2';
+const CACHE_VERSION = 'zonat-shell-v3';
 
 const SHELL_ASSETS = [
     './',
@@ -86,22 +90,25 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(req.url);
 
-    // Roster: network-first, fallback a cache (datos frescos cuando hay red,
-    // ultima version conocida cuando no la hay).
-    if (url.pathname.endsWith(ROSTER_URL_SUFFIX)) {
+    // Roster y codigo propio: network-first, fallback a cache (lo mas fresco cuando
+    // hay red, la ultima version conocida cuando no la hay).
+    const isOwnCode = req.mode === 'navigate' || /\/(index\.html|game\.js)$/.test(url.pathname);
+    if (url.pathname.endsWith(ROSTER_URL_SUFFIX) || isOwnCode) {
         event.respondWith(
             fetch(req)
                 .then((res) => {
-                    const copy = res.clone();
-                    caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
+                    if (res.ok) {
+                        const copy = res.clone();
+                        caches.open(CACHE_VERSION).then((cache) => cache.put(req, copy));
+                    }
                     return res;
                 })
-                .catch(() => caches.match(req))
+                .catch(() => caches.match(req, { ignoreSearch: true }))
         );
         return;
     }
 
-    // Todo lo demas (shell): cache-first, red como respaldo.
+    // Todo lo demas (three.js, imagenes): cache-first, red como respaldo.
     event.respondWith(
         caches.match(req).then((cached) => {
             if (cached) return cached;
