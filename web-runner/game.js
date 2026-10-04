@@ -299,6 +299,542 @@ class AudioEngine {
     }
 }
 
+// --- 2b. AVATARES 3D DE LOS DJs ---
+// Cada DJ tiene un "look" (pelo, ropa, neon, accesorios) que replica su imagen de
+// assets/avatars/. La camara sigue al corredor desde atras, asi que los rasgos que
+// identifican a cada DJ (pelo, espalda de la chaqueta, audifonos, props) estan
+// pensados para leerse en esa vista; el frente tambien se modela para que coincida.
+const AV = {
+    // glow: autoiluminacion del propio color, para que la ropa oscura no se pierda contra la calle
+    // sin tener que sumar luces a la escena.
+    std: (color, roughness = 0.55, metalness = 0.08, glow = 0.45) =>
+        new THREE.MeshStandardMaterial({ color, roughness, metalness, emissive: color, emissiveIntensity: glow }),
+    neon: (color, opacity = 1) => new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity }),
+    box: (w, h, d = 0.03) => new THREE.BoxGeometry(w, h, d),
+    cyl: (rt, rb, h, seg = 12, open = false) => new THREE.CylinderGeometry(rt, rb, h, seg, 1, open),
+    sph: (r, ws = 16, hs = 12) => new THREE.SphereGeometry(r, ws, hs),
+    cap: (r, theta) => new THREE.SphereGeometry(r, 18, 10, 0, Math.PI * 2, 0, theta),
+    torus: (r, tube, arc = Math.PI * 2) => new THREE.TorusGeometry(r, tube, 8, 24, arc),
+    cone: (r, h, seg = 8) => new THREE.ConeGeometry(r, h, seg),
+    // Caja con la base y/o la tapa escaladas: da torsos y abrigos con forma.
+    taper(w, h, d, botX = 1, botZ = 1, topX = 1, topZ = 1) {
+        const g = new THREE.BoxGeometry(w, h, d);
+        const p = g.attributes.position;
+        for (let i = 0; i < p.count; i++) {
+            const top = p.getY(i) > 0;
+            p.setX(i, p.getX(i) * (top ? topX : botX));
+            p.setZ(i, p.getZ(i) * (top ? topZ : botZ));
+        }
+        g.computeVertexNormals();
+        return g;
+    },
+    put(parent, geo, mat, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(x, y, z);
+        m.rotation.set(rx, ry, rz);
+        parent.add(m);
+        return m;
+    }
+};
+
+const DJ_LOOKS = {
+    // FRESAR: visor rojo, chaqueta tactica negra con correas y ribetes rojos.
+    dj_fresar: {
+        hair: "quiff", gloves: true, headphones: null,
+        palette: { skin: 0xd9a27e, hair: 0x1a1216, top: 0x1b161d, pants: 0x131118, shoes: 0x0e0d12, neon: 0xff1040, neon2: 0x35e0ff },
+        decor(c) {
+            AV.put(c.body, AV.cyl(0.16, 0.2, 0.17, 12, true), c.m.topD, 0, 0.64, 0);
+            AV.put(c.body, AV.torus(0.162, 0.016), c.m.neon, 0, 0.725, 0, Math.PI / 2);
+            [c.zf, c.zb].forEach(z => {
+                [-1, 1].forEach(s => AV.put(c.body, AV.box(0.06, 0.82), c.m.neon, s * 0.2, 0.13, z));
+                AV.put(c.body, AV.box(0.46, 0.05), c.m.neon, 0, 0.3, z);
+            });
+            AV.put(c.body, AV.box(0.24, 0.1), c.m.neon, 0, 0.45, c.zb);
+            [c.armL, c.armR].forEach(a => {
+                AV.put(a, AV.torus(0.125, 0.016), c.m.neon, 0, -0.14, 0, Math.PI / 2);
+                AV.put(a, AV.torus(0.105, 0.014), c.m.neon, 0, -0.5, 0, Math.PI / 2);
+            });
+            AV.put(c.armL, AV.cyl(0.108, 0.098, 0.2, 10), c.m.dark, 0, -0.4, 0);
+            [-0.34, -0.4, -0.46].forEach(y => AV.put(c.armL, AV.torus(0.112, 0.008), c.m.neon2, 0, y, 0, Math.PI / 2));
+            AV.put(c.head, AV.box(0.5, 0.1, 0.14), c.m.neon, 0, 0.04, 0.2);
+            [-1, 1].forEach(s => AV.put(c.head, AV.box(0.03, 0.07, 0.34), c.m.neon, s * 0.255, 0.04, 0.05));
+            [c.legL, c.legR].forEach(l => {
+                AV.put(l, AV.torus(0.132, 0.012), c.m.neon, 0, -0.36, 0, Math.PI / 2);
+                AV.put(l, AV.box(0.03, 0.24), c.m.neon, 0, -0.18, -0.145);
+            });
+            c.game.fresarLight = c.accent;
+        }
+    },
+    // NOCTUA: chaqueta con capucha y plumas-circuito cian en los hombros, audifonos plateados al cuello.
+    dj_noctua: {
+        hair: "crop",
+        headphones: { mode: "neck", cup: 0xc9d1da, ring: 0x00e5ff },
+        palette: { skin: 0xc48a66, hair: 0x15110f, top: 0x171c24, pants: 0x12151c, shoes: 0x0f1116, neon: 0x19f0e0, neon2: 0x00b8ff },
+        decor(c) {
+            const hood = AV.put(c.body, AV.sph(0.21, 14, 10), c.m.top, 0, 0.5, -0.27);
+            hood.scale.set(1.35, 0.85, 0.75);
+            [c.zf, c.zb].forEach(z => [-1, 1].forEach(s => {
+                for (let k = 0; k < 5; k++) {
+                    AV.put(c.body, AV.box(0.034, 0.38 - k * 0.05), c.m.neon, s * (0.1 + k * 0.062), 0.3 - k * 0.028, z, 0, 0, s * (0.1 + k * 0.14));
+                }
+            }));
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                for (let k = 0; k < 3; k++) AV.put(a, AV.box(0.03, 0.15, 0.03), c.m.neon, s * 0.115, -0.08 - k * 0.11, -0.05 + k * 0.05, 0, 0, s * 0.25);
+            });
+            AV.put(c.body, AV.cone(0.05, 0.1, 4), c.m.metal, 0, 0.36, c.zf + 0.02, Math.PI);
+        }
+    },
+    // CAMILO B2B: bomber de cuero con glifos naranja, pelo rizado, barba, cadena dorada.
+    dj_camilo: {
+        hair: "curly", beard: true, topRough: 0.28, topMetal: 0.25,
+        headphones: { mode: "on", cup: 0x18181c, ring: 0xffb020 },
+        palette: { skin: 0xc48a62, hair: 0x1c120c, top: 0x2b1d15, pants: 0x15151a, shoes: 0x14110f, neon: 0xff7a00, neon2: 0xffc23a },
+        decor(c) {
+            AV.put(c.body, AV.box(0.66, 0.1, 0.4), c.m.dark, 0, -0.34, 0);
+            [c.zf, c.zb].forEach(z => [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.05, 0.36), c.m.neon, s * 0.25, 0.2, z);
+                AV.put(c.body, AV.box(0.13, 0.045), c.m.neon, s * 0.185, 0.2, z);
+                AV.put(c.body, AV.box(0.045, 0.22), c.m.neon, s * 0.12, 0.2, z);
+            }));
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                [-0.06, 0, 0.06].forEach(z => AV.put(a, AV.box(0.03, 0.5, 0.025), c.m.neon, s * 0.118, -0.36, z));
+                AV.put(a, AV.cyl(0.1, 0.1, 0.07, 10), c.m.dark, 0, -0.64, 0);
+            });
+            const chain = AV.put(c.body, AV.torus(0.17, 0.014), AV.std(0xe8b63a, 0.25, 0.8), 0, 0.5, 0.09, 1.15);
+            chain.scale.set(1, 1.25, 1);
+        }
+    },
+    // VALERIA NEON: bob con mechas verdes y visor, chaqueta corta con franjas verdes.
+    dj_valeria: {
+        female: true, hair: "bob", midriff: true, topRough: 0.3, topMetal: 0.2,
+        headphones: { mode: "neck", cup: 0x16161a, ring: 0x39ff14 },
+        palette: { skin: 0xc99a78, hair: 0x101012, streak: 0x39ff14, top: 0x15171a, pants: 0x121316, shoes: 0x0f1013, neon: 0x2dff4f, neon2: 0x9dff00 },
+        decor(c) {
+            AV.put(c.body, AV.cyl(0.15, 0.185, 0.15, 12, true), c.m.topD, 0, 0.63, 0);
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                AV.put(a, AV.box(0.03, 0.62, 0.07), c.m.neon, s * 0.088, -0.34, 0);
+            });
+            [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.2, 0.055), c.m.neon, s * 0.17, 0.33, c.zf);
+                AV.put(c.body, AV.box(0.045, 0.46), c.m.neon, s * 0.24, 0.26, c.zb, 0, 0, s * 0.1);
+            });
+            AV.put(c.body, AV.box(0.5, 0.055), c.m.neon, 0, 0.42, c.zb);
+            AV.put(c.body, AV.box(0.56, 0.07, 0.35), c.m.dark, 0, 0.0, 0);
+            AV.put(c.head, AV.box(0.42, 0.06, 0.28), AV.neon(0x55ff55, 0.7), 0, 0.2, 0.09, -0.22);
+        }
+    },
+    // ZONA T COLECTIVO: chaqueta deportiva negra con lineas de neon violeta.
+    dj_bogota_allstars: {
+        hair: "quiff",
+        headphones: { mode: "neck", cup: 0x17161c, ring: 0x3a3542 },
+        palette: { skin: 0xd9a886, hair: 0x1f1611, top: 0x16141d, pants: 0x121118, shoes: 0x0f0e14, neon: 0xd060ff, neon2: 0xa040ff },
+        decor(c) {
+            AV.put(c.body, AV.cyl(0.16, 0.2, 0.16, 12, true), c.m.topD, 0, 0.64, 0);
+            [c.zf, c.zb].forEach(z => {
+                AV.put(c.body, AV.box(0.74, 0.04), c.m.neon, 0, 0.24, z);
+                AV.put(c.body, AV.box(0.62, 0.03), c.m.neon, 0, -0.33, z * 0.92);
+            });
+            AV.put(c.body, AV.box(0.03, 0.92), c.m.neon, 0, 0.1, c.zf);
+            [-1, 1].forEach(s => AV.put(c.body, AV.box(0.035, 0.32), c.m.neon, s * 0.22, 0.42, c.zb, 0, 0, -s * 0.95));
+            [c.armL, c.armR].forEach(a => AV.put(a, AV.torus(0.128, 0.018), c.m.neon, 0, -0.23, 0, Math.PI / 2));
+            [c.legL, c.legR].forEach((l, i) => {
+                const s = i ? 1 : -1;
+                AV.put(l, AV.box(0.03, 0.3, 0.03), c.m.neon, s * 0.135, -0.18, 0);
+            });
+        }
+    },
+    // LETAL: traje de latex negro, pelo negro largo con mechas rojas, violin de neon violeta.
+    dj_letal: {
+        female: true, hair: "long", boots: true, topRough: 0.16, topMetal: 0.5,
+        headphones: null,
+        palette: { skin: 0xe0b090, hair: 0x0c0a0e, streak: 0xc21a34, top: 0x121019, pants: 0x121019, shoes: 0x0b0a0f, neon: 0xcc33ff, neon2: 0x8f5bff },
+        decor(c) {
+            const belt = AV.put(c.body, AV.torus(0.29, 0.016), c.m.neon, 0, -0.17, 0, Math.PI / 2);
+            belt.scale.set(1, 0.62, 1);
+            [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.03, 0.2), c.m.neon, s * 0.2, 0.3, c.zb);
+                AV.put(c.body, AV.box(0.03, 0.14), c.m.neon, s * 0.13, 0.05, c.zb);
+                AV.put(c.body, AV.box(0.03, 0.16), c.m.neon, s * 0.2, 0.26, c.zf);
+            });
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                AV.put(a, AV.box(0.03, 0.2, 0.03), c.m.neon, s * 0.088, -0.42, 0);
+                AV.put(a, AV.cyl(0.082, 0.078, 0.12, 10), c.m.dark, 0, -0.62, 0);
+            });
+            [c.legL, c.legR].forEach((l, i) => {
+                const s = i ? 1 : -1;
+                AV.put(l, AV.torus(0.125, 0.02), c.m.dark, 0, -0.2, 0, Math.PI / 2);
+                AV.put(l, AV.box(0.07, 0.16, 0.16), c.m.dark, s * 0.14, -0.26, 0);
+                AV.put(l, AV.box(0.03, 0.1, 0.03), c.m.neon, s * 0.18, -0.26, 0);
+            });
+            // Violin electrico en la mano izquierda y arco en la derecha
+            const violin = new THREE.Group();
+            violin.position.set(-0.04, -0.72, 0.06);
+            violin.rotation.set(-1.15, 0, 0.25);
+            c.armL.add(violin);
+            const glass = AV.neon(0xb44dff, 0.55);
+            const lower = AV.put(violin, AV.cyl(0.13, 0.13, 0.035, 18), glass, 0, 0.08, 0, Math.PI / 2);
+            const upper = AV.put(violin, AV.cyl(0.1, 0.1, 0.035, 18), glass, 0, 0.26, 0, Math.PI / 2);
+            lower.scale.set(1, 1, 1.15);
+            upper.scale.set(1, 1, 1.1);
+            AV.put(violin, AV.torus(0.13, 0.012), c.m.neon, 0, 0.08, 0).scale.set(1, 1.15, 1);
+            AV.put(violin, AV.torus(0.1, 0.012), c.m.neon, 0, 0.26, 0).scale.set(1, 1.1, 1);
+            AV.put(violin, AV.box(0.035, 0.42, 0.035), c.m.neon, 0, 0.55, 0);
+            AV.put(violin, AV.sph(0.04, 8, 6), c.m.neon, 0, 0.78, 0);
+            AV.put(c.armR, AV.cyl(0.011, 0.011, 0.78, 6), c.m.neon, 0.03, -0.72, 0.2, 1.25, 0, 0);
+        }
+    },
+    // DJ NUÑEZ "El Toro en Llamas": hoodie negro con el toro, cargo, botas y fuego en el pie derecho.
+    dj_nunez: {
+        hair: "fade", beard: true, boots: true, bulk: 1.08,
+        headphones: { mode: "neck", cup: 0x1b1b20, ring: 0xc9d1da },
+        palette: { skin: 0xb9805c, hair: 0x14100d, top: 0x18181d, pants: 0x1c1c22, shoes: 0x2a1d14, neon: 0xff5a00, neon2: 0xffc400 },
+        decor(c) {
+            const hood = AV.put(c.body, AV.sph(0.22, 14, 10), c.m.top, 0, 0.5, -0.29);
+            hood.scale.set(1.4, 0.9, 0.8);
+            AV.put(c.body, AV.box(0.5, 0.2, 0.05), c.m.dark, 0, -0.2, c.zf);
+            const cream = AV.neon(0xffd9a0);
+            [c.zf, c.zb].forEach(z => {
+                AV.put(c.body, AV.taper(0.2, 0.2, 0.03, 0.55), c.m.neon, 0, 0.22, z);
+                [-1, 1].forEach(s => {
+                    AV.put(c.body, AV.box(0.15, 0.045), c.m.neon, s * 0.16, 0.32, z, 0, 0, s * 0.5);
+                    AV.put(c.body, AV.box(0.045, 0.1), c.m.neon2, s * 0.235, 0.4, z, 0, 0, -s * 0.15);
+                });
+                AV.put(c.body, AV.box(0.4, 0.035), cream, 0, 0.05, z);
+                AV.put(c.body, AV.box(0.26, 0.025), c.m.neon, 0, -0.01, z);
+            });
+            [-1, 1].forEach(s => AV.put(c.body, AV.cyl(0.012, 0.012, 0.22, 6), cream, s * 0.07, 0.42, c.zf + 0.02));
+            [c.legL, c.legR].forEach((l, i) => {
+                const s = i ? 1 : -1;
+                AV.put(l, AV.box(0.1, 0.2, 0.2), c.m.pants, s * 0.14, -0.3, 0);
+            });
+            // Fuego en el pie derecho (el cuarto tiempo lo enciende desde update)
+            const outer = AV.neon(0xff5a00, 0.85), inner = AV.neon(0xffd24a, 0.95);
+            AV.put(c.legR, AV.cone(0.13, 0.42, 8), outer, 0, -0.62, -0.18, -0.55);
+            AV.put(c.legR, AV.cone(0.075, 0.3, 8), inner, 0, -0.66, -0.16, -0.55);
+            AV.put(c.legR, AV.cone(0.09, 0.3, 8), outer, 0.1, -0.7, 0.0, -0.3, 0, -0.35);
+            AV.put(c.legR, AV.cone(0.08, 0.26, 8), outer, -0.09, -0.72, 0.06, -0.2, 0, 0.35);
+            c.accent.position.set(0.25, 0.35, -0.35);
+            c.accent.color.setHex(0xff4400);
+            c.game.flameLight = c.accent;
+        }
+    },
+    // DJ TATAN: bomber negro con circuitos verdes y una onda de audio en la espalda.
+    dj_tatan: {
+        hair: "quiff", beard: true,
+        headphones: { mode: "neck", cup: 0x15161b, ring: 0x35e0ff },
+        palette: { skin: 0xc98f68, hair: 0x15110f, top: 0x161a22, pants: 0x101218, shoes: 0x0e1014, neon: 0x1dff7a, neon2: 0x35d0ff },
+        decor(c) {
+            [0.08, 0.17, 0.3, 0.42, 0.54, 0.42, 0.3, 0.17, 0.08].forEach((h, i) =>
+                AV.put(c.body, AV.box(0.036, h), i % 2 ? c.m.neon2 : c.m.neon, (i - 4) * 0.06, 0.08, c.zb));
+            [-1, 1].forEach(s => [0.06, 0.14, 0.22, 0.14, 0.06].forEach((h, i) =>
+                AV.put(c.body, AV.box(0.026, h), s < 0 ? c.m.neon : c.m.neon2, s * 0.2 + (i - 2) * 0.04, 0.14, c.zf)));
+            [c.zf, c.zb].forEach(z => [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.03, 0.2), c.m.neon, s * 0.33, 0.44, z);
+                AV.put(c.body, AV.box(0.1, 0.03), c.m.neon, s * 0.295, 0.35, z);
+                AV.put(c.body, AV.box(0.03, 0.2), c.m.neon, s * 0.27, -0.2, z);
+                AV.put(c.body, AV.box(0.1, 0.03), c.m.neon2, s * 0.235, -0.11, z);
+            }));
+            AV.put(c.body, AV.box(0.03, 0.9), c.m.neon2, 0, 0.1, c.zf);
+            AV.put(c.body, AV.box(0.66, 0.09, 0.4), c.m.dark, 0, -0.34, 0);
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                AV.put(a, AV.box(0.03, 0.3, 0.03), c.m.neon, s * 0.12, -0.2, 0);
+                AV.put(a, AV.box(0.03, 0.03, 0.12), c.m.neon, s * 0.115, -0.36, 0.045);
+                AV.put(a, AV.box(0.03, 0.2, 0.03), c.m.neon2, s * 0.108, -0.47, 0.09);
+            });
+            AV.put(c.body, AV.cone(0.04, 0.08, 4), c.m.metal, 0, 0.36, c.zf + 0.02, Math.PI);
+            c.game.tatanLight = c.accent;
+        }
+    },
+    // DJ MOLECULAR: traje cromado con el monograma de picos y la molecula en la espalda.
+    dj_molecular: {
+        hair: "none", helmet: true, gloves: true, topRough: 0.25, topMetal: 0.45, glow: 0.25,
+        headphones: null,
+        palette: { skin: 0xb9c3cf, hair: 0xb9c3cf, top: 0x8f9aa8, pants: 0x6c7684, shoes: 0x555e6a, neon: 0x00e5ff, neon2: 0xffffff },
+        decor(c) {
+            AV.put(c.head, AV.box(0.44, 0.1, 0.16), c.m.neon, 0, 0.03, 0.19);
+            AV.put(c.head, AV.torus(0.262, 0.014), c.m.neon, 0, 0.03, 0, Math.PI / 2);
+            [c.zf, c.zb].forEach(z => {
+                [[-0.24, 0.4], [-0.1, -0.4], [0.1, 0.4], [0.24, -0.4]].forEach(([x, rz]) =>
+                    AV.put(c.body, AV.box(0.04, 0.4), c.m.neon, x, 0.22, z, 0, 0, -rz));
+            });
+            const orbit = AV.put(c.body, AV.torus(0.36, 0.013), c.m.neon, 0, 0.12, c.zb - 0.02, 0, 0, 0.3);
+            orbit.scale.set(1, 0.3, 1);
+            const atoms = [[0.14, -0.14], [0.28, -0.05], [0.28, -0.26]];
+            atoms.forEach(([x, y]) => AV.put(c.body, AV.sph(0.05, 10, 8), c.m.neon2, x, y, c.zb - 0.02));
+            AV.put(c.body, AV.box(0.16, 0.022), c.m.neon, 0.21, -0.095, c.zb - 0.01, 0, 0, 0.57);
+            AV.put(c.body, AV.box(0.16, 0.022), c.m.neon, 0.21, -0.2, c.zb - 0.01, 0, 0, -0.7);
+            [c.armL, c.armR].forEach(a => AV.put(a, AV.torus(0.125, 0.014), c.m.neon, 0, -0.3, 0, Math.PI / 2));
+            [c.legL, c.legR].forEach(l => AV.put(l, AV.torus(0.125, 0.012), c.m.neon, 0, -0.4, 0, Math.PI / 2));
+        }
+    },
+    // DJ STHEP: chaqueta entallada con ribetes rosa, pelo largo ondulado con mechas rosa, microfono.
+    dj_sthep: {
+        female: true, hair: "wavy", topRough: 0.4, topMetal: 0.15,
+        headphones: { mode: "neck", cup: 0x17161a, ring: 0x3b3640 },
+        palette: { skin: 0xd09c7a, hair: 0x20130d, streak: 0xff3d9a, top: 0x17141a, pants: 0x121116, shoes: 0x100f13, neon: 0xff3d9a, neon2: 0xff8cc6 },
+        decor(c) {
+            AV.put(c.body, AV.box(0.04, 0.58), c.m.neon, 0, 0.27, c.zf);
+            [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.04, 0.52), c.m.neon, s * 0.16, 0.3, c.zf, 0, 0, -s * 0.4);
+                AV.put(c.body, AV.box(0.04, 0.56), c.m.neon, s * 0.15, 0.27, c.zb, 0, 0, s * 0.12);
+            });
+            const belt = AV.put(c.body, AV.torus(0.262, 0.016), c.m.neon, 0, -0.02, 0, Math.PI / 2);
+            belt.scale.set(1, 0.62, 1);
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                AV.put(a, AV.box(0.03, 0.62, 0.06), c.m.neon, s * 0.088, -0.34, 0);
+            });
+            // Microfono magenta en la mano derecha
+            const mic = new THREE.Group();
+            mic.position.set(0, -0.74, 0.05);
+            mic.rotation.set(1.2, 0, 0);
+            c.armR.add(mic);
+            AV.put(mic, AV.cyl(0.03, 0.024, 0.22, 10), AV.std(0xb0127a, 0.3, 0.5), 0, 0.02, 0);
+            AV.put(mic, AV.sph(0.058, 12, 10), c.m.neon, 0, 0.17, 0);
+        }
+    },
+    // CAMILA LEURO: abrigo negro largo con costuras lila, cuello alto, mono bajo y anillos hipnoticos.
+    dj_camila_leuro: {
+        female: true, hair: "bun", turtleneck: true, topRough: 0.6, topMetal: 0.05,
+        headphones: { mode: "neck", cup: 0x151419, ring: 0x35303b },
+        palette: { skin: 0xc9967a, hair: 0x1b1512, top: 0x17151d, pants: 0x121116, shoes: 0x0f0e13, neon: 0xcaa0ff, neon2: 0xe9d5ff },
+        decor(c) {
+            AV.put(c.body, AV.box(0.86, 0.09, 0.36), c.m.top, 0, 0.56, 0);
+            AV.put(c.body, AV.taper(0.6, 0.64, 0.4, 1.14, 1.12), c.m.top, 0, -0.5, 0);
+            [-1, 1].forEach(s => {
+                AV.put(c.body, AV.box(0.02, 1.34), c.m.neon, s * 0.18, -0.12, c.zb - 0.03, 0, 0, s * 0.03);
+                AV.put(c.body, AV.box(0.02, 0.5), c.m.neon, s * 0.11, 0.32, c.zf + 0.005, 0, 0, s * 0.28);
+                AV.put(c.body, AV.box(0.02, 0.72), c.m.neon, s * 0.05, -0.46, c.zf + 0.03);
+            });
+            [c.armL, c.armR].forEach((a, i) => {
+                const s = i ? 1 : -1;
+                AV.put(a, AV.box(0.02, 0.6, 0.02), c.m.neon, s * 0.09, -0.34, -0.03);
+            });
+            [0.11, 0.19, 0.27].forEach(r => AV.put(c.body, AV.torus(r, 0.011), c.m.neon2, 0, 0.2, c.zb - 0.035));
+        }
+    }
+};
+
+// Look generico para DJs nuevos que todavia no tienen uno propio: chaqueta oscura con su color.
+function getDJLook(dj) {
+    if (DJ_LOOKS[dj.id]) return DJ_LOOKS[dj.id];
+    const neon = dj.neonColor || dj.colorHex || 0x00ffff;
+    return {
+        female: !!dj.isFemale, hair: dj.isFemale ? "long" : "crop",
+        headphones: { mode: "neck", cup: 0x17171c, ring: neon },
+        palette: { skin: 0xd0a07c, hair: 0x1a1412, top: 0x171820, pants: 0x121218, shoes: 0x0f0f14, neon, neon2: neon },
+        decor(c) {
+            [c.zf, c.zb].forEach(z => AV.put(c.body, AV.box(0.5, 0.045), c.m.neon, 0, 0.26, z));
+            AV.put(c.body, AV.box(0.035, 0.6), c.m.neon, 0, 0.1, c.zb);
+            [c.armL, c.armR].forEach((a, i) => AV.put(a, AV.box(0.03, 0.5, 0.05), c.m.neon, (i ? 1 : -1) * 0.1, -0.34, 0));
+        }
+    };
+}
+
+function avBuildHair(c, look) {
+    const head = c.head, H = c.m.hair, P = look.palette;
+    const streak = P.streak !== undefined ? AV.neon(P.streak) : null;
+    const cap = (r, theta, tilt, y = 0.03) => {
+        const m = AV.put(head, AV.cap(r, theta), H, 0, y, -0.012, tilt, 0, 0);
+        m.scale.set(0.97, 1.1, 1.03);
+        return m;
+    };
+    switch (look.hair) {
+        case "none":
+            break;
+        case "fade":
+            cap(0.268, Math.PI * 0.4, -0.3);
+            break;
+        case "quiff":
+            cap(0.276, Math.PI * 0.56, -0.42);
+            AV.put(head, AV.box(0.32, 0.13, 0.24), H, 0, 0.28, 0.07, -0.3);
+            break;
+        case "curly":
+            cap(0.276, Math.PI * 0.56, -0.4);
+            for (let i = 0; i < 18; i++) {
+                const phi = i * 2.399, th = 0.15 + (i / 17) * 1.1;
+                const x = 0.275 * Math.sin(th) * Math.cos(phi);
+                const z = 0.275 * Math.sin(th) * Math.sin(phi);
+                if (z > 0.1 && th > 0.75) continue; // deja libre la cara
+                AV.put(head, AV.sph(0.09, 8, 6), H, x, 0.3 * Math.cos(th) + 0.04, z - 0.01);
+            }
+            break;
+        case "bob": {
+            cap(0.288, Math.PI * 0.5, -0.2);
+            const gap = 0.85; // media abertura (rad) que deja la cara libre
+            const curtain = AV.put(head, new THREE.CylinderGeometry(0.288, 0.305, 0.42, 18, 1, true, gap, Math.PI * 2 - gap * 2), c.m.hairD, 0, -0.13, 0);
+            curtain.scale.set(0.97, 1, 1.03);
+            AV.put(head, AV.box(0.38, 0.1, 0.05), H, 0, 0.13, 0.25);
+            if (streak) {
+                [1.15, 1.75, 2.55, Math.PI, 3.73, 4.53, 5.13].forEach(a =>
+                    AV.put(head, AV.box(0.055, 0.42, 0.02), streak, 0.3 * Math.sin(a), -0.13, 0.31 * Math.cos(a), 0, a, 0));
+                AV.put(head, AV.box(0.1, 0.1, 0.02), streak, 0.1, 0.13, 0.278);
+            }
+            break;
+        }
+        case "long": {
+            cap(0.286, Math.PI * 0.56, -0.3);
+            AV.put(head, AV.taper(0.5, 1.02, 0.14, 0.82), H, 0, -0.5, -0.2, 0.05);
+            [-1, 1].forEach(s => AV.put(head, AV.box(0.09, 0.64, 0.1), H, s * 0.238, -0.34, 0.07));
+            if (streak) {
+                [-0.15, 0.13].forEach(x => AV.put(head, AV.box(0.05, 0.94, 0.02), streak, x, -0.5, -0.292, 0.05));
+                [-1, 1].forEach(s => AV.put(head, AV.box(0.035, 0.6, 0.02), streak, s * 0.26, -0.34, 0.125));
+            }
+            break;
+        }
+        case "wavy": {
+            cap(0.288, Math.PI * 0.56, -0.3);
+            for (let k = 0; k < 5; k++) {
+                const w = AV.put(head, AV.sph(0.2, 12, 8), H, (k % 2 ? 0.05 : -0.05), -0.1 - k * 0.2, -0.2);
+                w.scale.set(1.3 - k * 0.05, 0.8, 0.55);
+                if (streak && k > 0) {
+                    const st = AV.put(head, AV.sph(0.07, 8, 6), streak, (k % 2 ? -0.16 : 0.17), -0.1 - k * 0.2, -0.275);
+                    st.scale.set(0.45, 2.3, 0.4);
+                }
+            }
+            [-1, 1].forEach(s => {
+                for (let k = 0; k < 3; k++) {
+                    const lock = AV.put(head, AV.sph(0.09, 10, 8), k === 1 && streak ? streak : H, s * (0.24 + (k % 2) * 0.02), -0.14 - k * 0.19, 0.06);
+                    lock.scale.set(0.8, 1.4, 0.9);
+                }
+            });
+            break;
+        }
+        case "bun":
+            cap(0.272, Math.PI * 0.62, -0.5);
+            AV.put(head, AV.sph(0.105, 12, 10), H, 0, -0.07, -0.275);
+            break;
+        default: // "crop"
+            cap(0.276, Math.PI * 0.56, -0.42);
+    }
+}
+
+function buildDJAvatar(game, look) {
+    const P = look.palette;
+    const fem = !!look.female;
+    const bulk = look.bulk || 1;
+    const topRough = look.topRough !== undefined ? look.topRough : 0.5;
+    const topMetal = look.topMetal !== undefined ? look.topMetal : 0.12;
+    const glow = look.glow !== undefined ? look.glow : 0.9;
+    const m = {
+        // La calle tiene muchas luces de neon: la piel se atenua para que no se queme a blanco.
+        skin: AV.std(new THREE.Color(P.skin).multiplyScalar(0.46), 0.75, 0.0, 0.08),
+        hair: AV.std(P.hair, 0.6, 0.05, 0.45),
+        top: AV.std(P.top, topRough, topMetal, glow),
+        pants: AV.std(P.pants, 0.6, 0.08, glow),
+        shoes: AV.std(P.shoes, 0.5, 0.1, glow),
+        dark: AV.std(0x0e0e13, 0.45, 0.2, 0.8),
+        metal: AV.std(0xc4ccd6, 0.3, 0.6),
+        neon: AV.neon(P.neon),
+        neon2: AV.neon(P.neon2 !== undefined ? P.neon2 : P.neon)
+    };
+    m.hairD = m.hair.clone();
+    m.hairD.side = THREE.DoubleSide;
+    m.topD = m.top.clone();
+    m.topD.side = THREE.DoubleSide;
+    if (look.helmet) m.skin = AV.std(P.skin, 0.22, 0.5, 0.2);
+
+    // Tronco: playerMesh es el grupo que update() aplasta al deslizarse.
+    const body = new THREE.Group();
+    body.position.y = 1.35;
+    game.player.add(body);
+    game.playerMesh = body;
+
+    const sw = fem ? 0.36 : 0.4 * bulk;
+    const zf = fem ? 0.205 : 0.225 * bulk;
+    const zb = -zf;
+    if (fem) {
+        AV.put(body, AV.taper(0.72, 0.6, 0.38, 0.72, 0.85), m.top, 0, 0.275, 0);
+        AV.put(body, AV.box(0.5, 0.18, 0.31), look.midriff ? m.skin : m.top, 0, -0.1, 0);
+        AV.put(body, AV.taper(0.6, 0.42, 0.36, 1, 1, 0.84, 0.88), m.pants, 0, -0.39, 0);
+    } else {
+        AV.put(body, AV.taper(0.8 * bulk, 0.95, 0.42 * bulk, 0.76, 0.88), m.top, 0, 0.1, 0);
+        AV.put(body, AV.box(0.62, 0.28, 0.36), m.pants, 0, -0.47, 0);
+    }
+    AV.put(body, AV.cyl(0.1, 0.125, 0.2, 12), look.turtleneck ? m.top : m.skin, 0, 0.65, 0);
+
+    const mkArm = (s) => {
+        const pivot = new THREE.Group();
+        pivot.position.set(s * (sw + 0.1), 0.47, 0);
+        body.add(pivot);
+        const r = fem ? 0.085 : 0.108 * bulk;
+        AV.put(pivot, AV.sph(r * 1.25, 12, 10), m.top, 0, 0, 0);
+        AV.put(pivot, AV.cyl(r, r * 0.82, 0.66, 10), m.top, 0, -0.34, 0);
+        AV.put(pivot, AV.sph(r * 0.95, 10, 8), look.gloves ? m.dark : m.skin, 0, -0.72, 0);
+        return pivot;
+    };
+    const armL = mkArm(-1), armR = mkArm(1);
+    game.limbs.leftArm = armL;
+    game.limbs.rightArm = armR;
+
+    const mkLeg = (s) => {
+        const pivot = new THREE.Group();
+        pivot.position.set(s * (fem ? 0.17 : 0.21), 0.86, 0);
+        game.player.add(pivot);
+        const r = fem ? 0.125 : 0.145;
+        AV.put(pivot, AV.cyl(r, r * 0.72, 0.74, 10), m.pants, 0, -0.37, 0);
+        const bootH = look.boots ? 0.27 : 0.14;
+        AV.put(pivot, AV.box(0.2, bootH, 0.36), m.shoes, 0, -0.815 + bootH / 2, 0.05);
+        AV.put(pivot, AV.box(0.21, 0.045, 0.38), m.neon, 0, -0.8375, 0.05);
+        return pivot;
+    };
+    const legL = mkLeg(-1), legR = mkLeg(1);
+    game.limbs.leftLeg = legL;
+    game.limbs.rightLeg = legR;
+
+    // Cabeza
+    const head = new THREE.Group();
+    head.position.set(0, 1.0, 0.01);
+    head.scale.setScalar(fem ? 1.1 : 1.14);
+    body.add(head);
+    const skull = AV.put(head, AV.sph(0.26, 18, 14), m.skin);
+    skull.scale.set(0.94, 1.1, 1.0);
+    if (!look.helmet) {
+        [-1, 1].forEach(s => AV.put(head, AV.box(0.07, 0.035, 0.03), m.dark, s * 0.095, 0.03, 0.238));
+        if (look.beard || look.stubble) {
+            const beard = AV.put(head, AV.sph(0.238, 14, 10), m.hair, 0, -0.175, 0.04);
+            beard.scale.set(0.86, look.beard ? 0.44 : 0.34, 0.9);
+        }
+    }
+
+    const c = { game, body, head, armL, armR, legL, legR, m, zf, zb, accent: null };
+    avBuildHair(c, look);
+
+    // Audifonos
+    const hp = look.headphones;
+    if (hp) {
+        const cupMat = AV.std(hp.cup, 0.35, 0.4);
+        const ringMat = AV.neon(hp.ring);
+        if (hp.mode === "neck") {
+            AV.put(body, AV.torus(0.2, 0.03, Math.PI), cupMat, 0, 0.6, -0.02, -Math.PI / 2);
+            [-1, 1].forEach(s => {
+                AV.put(body, AV.cyl(0.105, 0.105, 0.08, 16), cupMat, s * 0.21, 0.58, 0.03, 0, 0, Math.PI / 2);
+                AV.put(body, AV.cyl(0.07, 0.07, 0.095, 16), ringMat, s * 0.21, 0.58, 0.03, 0, 0, Math.PI / 2);
+            });
+        } else {
+            AV.put(head, AV.torus(0.288, 0.028, Math.PI), cupMat, 0, 0.0, 0);
+            [-1, 1].forEach(s => {
+                AV.put(head, AV.cyl(0.115, 0.115, 0.09, 16), cupMat, s * 0.275, -0.01, 0, 0, 0, Math.PI / 2);
+                AV.put(head, AV.cyl(0.075, 0.075, 0.105, 16), ringMat, s * 0.275, -0.01, 0, 0, 0, Math.PI / 2);
+            });
+        }
+    }
+
+    // Una sola luz de acento del color del DJ, detras del corredor (lado de la camara).
+    const accent = new THREE.PointLight(P.neon, 0.7, 7, 1.5);
+    accent.position.set(0, 1.9, -2.4);
+    game.player.add(accent);
+    c.accent = accent;
+
+    if (look.decor) look.decor(c);
+    return c;
+}
+
 // --- 3. MAIN GAME CONTROLLER ---
 class ZonaTRunnerGame {
     constructor() {
@@ -417,6 +953,7 @@ class ZonaTRunnerGame {
         });
 
         document.getElementById("high-score-val").innerText = this.highScore;
+        this.updateHudAvatar();
         document.getElementById("btn-start-run").addEventListener("click", () => this.startRun());
         document.getElementById("btn-restart").addEventListener("click", () => this.startRun());
         document.getElementById("btn-change-dj").addEventListener("click", () => {
@@ -437,9 +974,37 @@ class ZonaTRunnerGame {
         cardEl.classList.add("selected");
         document.getElementById("hud-dj-name").innerText = dj.name;
         document.getElementById("hud-dj-name").style.color = dj.color;
+        this.updateHudAvatar();
         const bpmTag = document.getElementById("hud-bpm-tag");
         if (bpmTag) bpmTag.innerText = `BEAT ${dj.bpm} BPM`;
         this.applyDJTheme();
+    }
+
+    // Miniatura del avatar (la misma imagen de la tarjeta) junto a "DJ Activo".
+    updateHudAvatar() {
+        const nameEl = document.getElementById("hud-dj-name");
+        if (!nameEl) return;
+        let img = document.getElementById("hud-dj-avatar");
+        if (!img) {
+            const stat = nameEl.parentNode;
+            const textWrap = document.createElement("div");
+            while (stat.firstChild) textWrap.appendChild(stat.firstChild);
+            img = document.createElement("img");
+            img.id = "hud-dj-avatar";
+            img.alt = "";
+            img.style.cssText = "width:clamp(30px,5vw,46px);height:clamp(30px,5vw,46px);border-radius:50%;" +
+                "object-fit:cover;object-position:top;border:2px solid currentColor;flex:none;";
+            stat.style.display = "flex";
+            stat.style.alignItems = "center";
+            stat.style.justifyContent = "flex-end";
+            stat.style.gap = "10px";
+            stat.appendChild(textWrap);
+            stat.appendChild(img);
+        }
+        const dj = this.selectedDJ;
+        img.style.color = dj.color;
+        img.style.display = dj.avatar ? "block" : "none";
+        if (dj.avatar) img.src = dj.avatar;
     }
 
     applyDJTheme() {
@@ -454,6 +1019,10 @@ class ZonaTRunnerGame {
             const posY = this.player.position.y;
             const posZ = this.player.position.z;
             this.scene.remove(this.player);
+            this.player.traverse(o => {
+                if (o.geometry) o.geometry.dispose();
+                if (o.material) o.material.dispose();
+            });
             this.buildPlayerCharacter();
             this.player.position.set(posX, posY, posZ);
         }
@@ -1017,691 +1586,13 @@ class ZonaTRunnerGame {
     buildPlayerCharacter() {
         this.player = new THREE.Group();
         this.limbs = {};
-
-        if (this.selectedDJ.id === "dj_letal") {
-            // === 🐱 DJ LETAL: 3D CATWOMAN AVATAR WITH ELECTRIC NEON VIOLIN ===
-            const latexMat = new THREE.MeshStandardMaterial({
-                color: 0x090910,
-                roughness: 0.12,
-                metalness: 0.45
-            });
-            const skinMat = new THREE.MeshStandardMaterial({
-                color: 0xdca183,
-                roughness: 0.6,
-                metalness: 0.05
-            });
-            const hairMat = new THREE.MeshStandardMaterial({
-                color: 0x3d1b10,
-                roughness: 0.7
-            });
-            const purpleNeonMat = new THREE.MeshBasicMaterial({
-                color: 0xd400ff
-            });
-
-            // Torso root container
-            this.playerMesh = new THREE.Group();
-            this.playerMesh.position.y = 1.35;
-            this.player.add(this.playerMesh);
-
-            // 1. Upper Torso (Form-fitting black latex suit)
-            const bustGeo = new THREE.CylinderGeometry(0.44, 0.32, 0.62, 16);
-            const bust = new THREE.Mesh(bustGeo, latexMat);
-            bust.position.y = 0.25;
-            this.playerMesh.add(bust);
-
-            // Neckline accent
-            const neckAccentGeo = new THREE.BoxGeometry(0.18, 0.2, 0.46);
-            const neckAccent = new THREE.Mesh(neckAccentGeo, skinMat);
-            neckAccent.position.set(0, 0.45, 0.05);
-            this.playerMesh.add(neckAccent);
-
-            // Choker collar with silver zip
-            const chokerGeo = new THREE.TorusGeometry(0.16, 0.03, 8, 16);
-            const choker = new THREE.Mesh(chokerGeo, purpleNeonMat);
-            choker.rotation.x = Math.PI / 2;
-            choker.position.set(0, 0.62, 0);
-            this.playerMesh.add(choker);
-
-            // 2. Waist & Hips
-            const hipGeo = new THREE.CylinderGeometry(0.31, 0.42, 0.5, 16);
-            const hips = new THREE.Mesh(hipGeo, latexMat);
-            hips.position.y = -0.26;
-            this.playerMesh.add(hips);
-
-            // 3. Head & Face (Unmasked confident look)
-            const headGeo = new THREE.SphereGeometry(0.24, 18, 18);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.set(0, 0.88, 0.02);
-            this.playerMesh.add(head);
-
-            // 4. Long Auburn Hair
-            const hairTopGeo = new THREE.SphereGeometry(0.26, 16, 16);
-            const hairTop = new THREE.Mesh(hairTopGeo, hairMat);
-            hairTop.position.set(0, 0.92, -0.05);
-            this.playerMesh.add(hairTop);
-
-            // Hair back cascade
-            const hairBackGeo = new THREE.BoxGeometry(0.34, 0.72, 0.2);
-            const hairBack = new THREE.Mesh(hairBackGeo, hairMat);
-            hairBack.position.set(0, 0.58, -0.22);
-            hairBack.rotation.x = 0.15;
-            this.playerMesh.add(hairBack);
-
-            // 5. Cat Ears Headband
-            const earGeo = new THREE.ConeGeometry(0.09, 0.2, 4);
-            const earL = new THREE.Mesh(earGeo, latexMat);
-            earL.position.set(-0.14, 1.15, -0.02);
-            earL.rotation.z = 0.22;
-            this.playerMesh.add(earL);
-
-            const earInnerL = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 4), purpleNeonMat);
-            earInnerL.position.set(-0.14, 1.14, 0.01);
-            earInnerL.rotation.z = 0.22;
-            this.playerMesh.add(earInnerL);
-
-            const earR = new THREE.Mesh(earGeo, latexMat);
-            earR.position.set(0.14, 1.15, -0.02);
-            earR.rotation.z = -0.22;
-            this.playerMesh.add(earR);
-
-            const earInnerR = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 4), purpleNeonMat);
-            earInnerR.position.set(0.14, 1.14, 0.01);
-            earInnerR.rotation.z = -0.22;
-            this.playerMesh.add(earInnerR);
-
-            // 6. 🎻 SIGNATURE ELECTRIC NEON VIOLIN (Mounted on shoulder/back)
-            const violinGroup = new THREE.Group();
-            violinGroup.position.set(0.48, 0.25, -0.2);
-            violinGroup.rotation.set(0.2, -0.3, 0.45);
-
-            // Violin body
-            const violinBodyGeo = new THREE.BoxGeometry(0.24, 0.6, 0.09);
-            const violinBodyMat = new THREE.MeshStandardMaterial({
-                color: 0x3a0066,
-                roughness: 0.2,
-                metalness: 0.7,
-                emissive: 0x7700cc,
-                emissiveIntensity: 0.5
-            });
-            const violinBody = new THREE.Mesh(violinBodyGeo, violinBodyMat);
-            violinGroup.add(violinBody);
-
-            // Glowing Violin Neck
-            const vNeckGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.45, 8);
-            const vNeck = new THREE.Mesh(vNeckGeo, purpleNeonMat);
-            vNeck.position.set(0, 0.45, 0);
-            violinGroup.add(vNeck);
-
-            // Glowing Strings
-            const stringGeo = new THREE.PlaneGeometry(0.08, 0.55);
-            const strings = new THREE.Mesh(stringGeo, purpleNeonMat);
-            strings.position.set(0, 0.1, 0.06);
-            violinGroup.add(strings);
-
-            // Dynamic PointLight casting violet glow
-            const violinLight = new THREE.PointLight(0xd400ff, 1.4, 4.5);
-            violinLight.position.set(0, 0.1, 0.3);
-            violinGroup.add(violinLight);
-
-            this.playerMesh.add(violinGroup);
-
-            // 7. Latex Limbs
-            const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.85, 12);
-            const leftLeg = new THREE.Mesh(legGeo, latexMat);
-            leftLeg.position.set(-0.2, 0.42, 0);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeo, latexMat);
-            rightLeg.position.set(0.2, 0.42, 0);
-            this.player.add(rightLeg);
-            this.limbs.rightLeg = rightLeg;
-
-            const armGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.72, 12);
-            const leftArm = new THREE.Mesh(armGeo, latexMat);
-            leftArm.position.set(-0.52, 1.35, 0);
-            this.player.add(leftArm);
-            this.limbs.leftArm = leftArm;
-
-            const rightArm = new THREE.Mesh(armGeo, latexMat);
-            rightArm.position.set(0.52, 1.35, 0);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-
-        } else if (this.selectedDJ.id === "dj_nunez") {
-            // === 🐂🔥 DJ NUÑEZ: "EL TORO EN LLAMAS" (Tall, lean, Venezuelan DJ, 1-2-3-4 right foot stomp) ===
-            const skinMat = new THREE.MeshStandardMaterial({ color: 0xdca888, roughness: 0.65 });
-            const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f7, roughness: 0.6 });
-            const blackShirtMat = new THREE.MeshStandardMaterial({ color: 0x111116, roughness: 0.7 });
-            const darkPantsMat = new THREE.MeshStandardMaterial({ color: 0x14141d, roughness: 0.8 });
-            const hairMat = new THREE.MeshStandardMaterial({ color: 0x1e1512, roughness: 0.9 });
-            const flameNeonMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
-
-            this.playerMesh = new THREE.Group();
-            this.playerMesh.position.y = 1.42; // Tall lean posture
-            this.player.add(this.playerMesh);
-
-            // 1. Tall Lean Torso (Two-tone White & Black Streetwear Shirt)
-            const upperTorsoGeo = new THREE.BoxGeometry(0.85, 0.6, 0.44);
-            const upperTorso = new THREE.Mesh(upperTorsoGeo, whiteShirtMat);
-            upperTorso.position.y = 0.32;
-            this.playerMesh.add(upperTorso);
-
-            // Glowing Flaming Bull Chest Emblem
-            const bullEmblemGeo = new THREE.BoxGeometry(0.28, 0.22, 0.05);
-            const bullEmblem = new THREE.Mesh(bullEmblemGeo, flameNeonMat);
-            bullEmblem.position.set(0, 0.32, 0.24);
-            this.playerMesh.add(bullEmblem);
-
-            // Silver cross chain necklace
-            const crossChainGeo = new THREE.BoxGeometry(0.06, 0.12, 0.04);
-            const crossChain = new THREE.Mesh(crossChainGeo, new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 0.9 }));
-            crossChain.position.set(0, 0.46, 0.24);
-            this.playerMesh.add(crossChain);
-
-            // Lower Torso (Black section of two-tone tee)
-            const lowerTorsoGeo = new THREE.BoxGeometry(0.82, 0.55, 0.42);
-            const lowerTorso = new THREE.Mesh(lowerTorsoGeo, blackShirtMat);
-            lowerTorso.position.y = -0.22;
-            this.playerMesh.add(lowerTorso);
-
-            // 2. Head & Facial Hair (Fade, curly top, neat beard)
-            const headGeo = new THREE.BoxGeometry(0.48, 0.54, 0.48);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.set(0, 0.92, 0.02);
-            this.playerMesh.add(head);
-
-            // Textured Curly Hair Top
-            const hairGeo = new THREE.BoxGeometry(0.46, 0.22, 0.44);
-            const hair = new THREE.Mesh(hairGeo, hairMat);
-            hair.position.set(0, 1.22, -0.02);
-            this.playerMesh.add(hair);
-
-            // Trimmed Goatee / Beard
-            const beardGeo = new THREE.BoxGeometry(0.38, 0.2, 0.18);
-            const beard = new THREE.Mesh(beardGeo, hairMat);
-            beard.position.set(0, 0.76, 0.18);
-            this.playerMesh.add(beard);
-
-            // 3. DJ Headphones around neck (from his DJ booth photo)
-            const hpGroup = new THREE.Group();
-            hpGroup.position.set(0, 0.65, 0.05);
-            const hpBandGeo = new THREE.TorusGeometry(0.24, 0.04, 8, 16, Math.PI);
-            const hpBand = new THREE.Mesh(hpBandGeo, blackShirtMat);
-            hpBand.rotation.x = Math.PI / 2;
-            hpGroup.add(hpBand);
-
-            const hpCupL = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12), flameNeonMat);
-            hpCupL.position.set(-0.25, 0, 0.08);
-            hpCupL.rotation.z = Math.PI / 2;
-            hpGroup.add(hpCupL);
-
-            const hpCupR = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.1, 12), flameNeonMat);
-            hpCupR.position.set(0.25, 0, 0.08);
-            hpCupR.rotation.z = Math.PI / 2;
-            hpGroup.add(hpCupR);
-            this.playerMesh.add(hpGroup);
-
-            // 4. Arms (White short sleeves + skin forearms)
-            const armGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.78, 10);
-            const leftArm = new THREE.Mesh(armGeo, skinMat);
-            leftArm.position.set(-0.54, 1.35, 0);
-            this.player.add(leftArm);
-            this.limbs.leftArm = leftArm;
-
-            const rightArm = new THREE.Mesh(armGeo, skinMat);
-            rightArm.position.set(0.54, 1.35, 0);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-
-            // 5. Tall Slim Cargo Joggers & Sneakers
-            const legGeo = new THREE.CylinderGeometry(0.14, 0.11, 0.95, 12);
-            const leftLeg = new THREE.Mesh(legGeo, darkPantsMat);
-            leftLeg.position.set(-0.22, 0.46, 0);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            // RIGHT LEG & SNEAKER: 🔥 "EL TORO EN LLAMAS" 1-2-3-4 FLAMING STOMP FOOT 🔥
-            const rightLegGroup = new THREE.Group();
-            rightLegGroup.position.set(0.22, 0.46, 0);
-            const rightLegMesh = new THREE.Mesh(legGeo, darkPantsMat);
-            rightLegGroup.add(rightLegMesh);
-
-            // Flaming sole / aura on right foot
-            const flameAuraGeo = new THREE.BoxGeometry(0.26, 0.22, 0.42);
-            const flameAura = new THREE.Mesh(flameAuraGeo, flameNeonMat);
-            flameAura.position.set(0, -0.42, 0.08);
-            rightLegGroup.add(flameAura);
-
-            // Glowing Flame Light on right foot
-            const footFlameLight = new THREE.PointLight(0xff4400, 2.0, 5.5);
-            footFlameLight.position.set(0, -0.38, 0.15);
-            rightLegGroup.add(footFlameLight);
-            this.flameLight = footFlameLight;
-
-            this.player.add(rightLegGroup);
-            this.limbs.rightLeg = rightLegGroup;
-
-        } else if (this.selectedDJ.id === "dj_tatan") {
-            // === 💚 DJ TATÁN / CALVIN PARRA (Club Octava resident, tech bomber jacket with emerald bioluminescent circuits) ===
-            const jacketMat = new THREE.MeshStandardMaterial({
-                color: 0x121722,
-                roughness: 0.35,
-                metalness: 0.35
-            });
-            const emeraldCircuitMat = new THREE.MeshBasicMaterial({
-                color: 0x00ff66
-            });
-            const cyanAccentMat = new THREE.MeshBasicMaterial({
-                color: 0x00f3ff
-            });
-            const skinMat = new THREE.MeshStandardMaterial({
-                color: 0xd8a280,
-                roughness: 0.6,
-                metalness: 0.05
-            });
-            const darkPantsMat = new THREE.MeshStandardMaterial({
-                color: 0x0c0e16,
-                roughness: 0.5
-            });
-
-            this.playerMesh = new THREE.Group();
-            this.playerMesh.position.y = 1.35;
-            this.player.add(this.playerMesh);
-
-            // 1. Torso: Athletic Bomber Jacket
-            const torsoGeo = new THREE.BoxGeometry(0.88, 1.05, 0.48);
-            const torso = new THREE.Mesh(torsoGeo, jacketMat);
-            torso.position.y = 0.15;
-            this.playerMesh.add(torso);
-
-            // Central zipper accent (cyan glow)
-            const zipGeo = new THREE.BoxGeometry(0.06, 0.95, 0.04);
-            const zip = new THREE.Mesh(zipGeo, cyanAccentMat);
-            zip.position.set(0, 0.15, 0.25);
-            this.playerMesh.add(zip);
-
-            // Bioluminescent spine circuit lines on the back
-            const spineCircuitGeo = new THREE.BoxGeometry(0.12, 0.85, 0.04);
-            const spineCircuit = new THREE.Mesh(spineCircuitGeo, emeraldCircuitMat);
-            spineCircuit.position.set(0, 0.15, -0.25);
-            this.playerMesh.add(spineCircuit);
-
-            // Octava Resident Hexagonal Glyph on upper back
-            const hexGlyphGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.04, 6);
-            const hexGlyph = new THREE.Mesh(hexGlyphGeo, emeraldCircuitMat);
-            hexGlyph.rotation.x = Math.PI / 2;
-            hexGlyph.position.set(0, 0.38, -0.25);
-            this.playerMesh.add(hexGlyph);
-
-            // 2. Head with short fade hair
-            const headGeo = new THREE.BoxGeometry(0.48, 0.52, 0.46);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.set(0, 0.92, 0.02);
-            this.playerMesh.add(head);
-
-            const hairGeo = new THREE.BoxGeometry(0.5, 0.2, 0.48);
-            const hairMat = new THREE.MeshStandardMaterial({ color: 0x221a14, roughness: 0.8 });
-            const hair = new THREE.Mesh(hairGeo, hairMat);
-            hair.position.set(0, 1.14, 0);
-            this.playerMesh.add(hair);
-
-            // 3. Cyber Rave Sunglasses (emerald polarized lens)
-            const shadesGeo = new THREE.BoxGeometry(0.44, 0.12, 0.15);
-            const shades = new THREE.Mesh(shadesGeo, emeraldCircuitMat);
-            shades.position.set(0, 0.95, 0.25);
-            this.playerMesh.add(shades);
-
-            // 4. Monitoring DJ Headphones resting around neck
-            const phonesCollarGeo = new THREE.TorusGeometry(0.24, 0.04, 8, 16);
-            const phonesCollar = new THREE.Mesh(phonesCollarGeo, cyanAccentMat);
-            phonesCollar.rotation.x = Math.PI / 2;
-            phonesCollar.position.set(0, 0.65, 0.02);
-            this.playerMesh.add(phonesCollar);
-
-            const earCupGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 12);
-            const leftCup = new THREE.Mesh(earCupGeo, emeraldCircuitMat);
-            leftCup.position.set(-0.25, 0.66, 0.05);
-            leftCup.rotation.z = 0.4;
-            this.playerMesh.add(leftCup);
-
-            const rightCup = new THREE.Mesh(earCupGeo, emeraldCircuitMat);
-            rightCup.position.set(0.25, 0.66, 0.05);
-            rightCup.rotation.z = -0.4;
-            this.playerMesh.add(rightCup);
-
-            // 5. Arms with Circuit Trim
-            const armGeo = new THREE.BoxGeometry(0.24, 0.72, 0.24);
-            const leftArm = new THREE.Mesh(armGeo, jacketMat);
-            leftArm.position.set(-0.58, 1.35, 0);
-            const leftStripeGeo = new THREE.BoxGeometry(0.04, 0.6, 0.25);
-            const leftStripe = new THREE.Mesh(leftStripeGeo, emeraldCircuitMat);
-            leftStripe.position.set(-0.1, 0, 0);
-            leftArm.add(leftStripe);
-            this.player.add(leftArm);
-            this.limbs.leftArm = leftArm;
-
-            const rightArm = new THREE.Mesh(armGeo, jacketMat);
-            rightArm.position.set(0.58, 1.35, 0);
-            const rightStripe = new THREE.Mesh(leftStripeGeo, emeraldCircuitMat);
-            rightStripe.position.set(0.1, 0, 0);
-            rightArm.add(rightStripe);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-
-            // 6. Legs & High-top Sneakers with Neon Green Soles
-            const legGeo = new THREE.BoxGeometry(0.28, 0.8, 0.28);
-            const leftLeg = new THREE.Mesh(legGeo, darkPantsMat);
-            leftLeg.position.set(-0.24, 0.4, 0);
-            const leftSoleGeo = new THREE.BoxGeometry(0.29, 0.08, 0.36);
-            const leftSole = new THREE.Mesh(leftSoleGeo, emeraldCircuitMat);
-            leftSole.position.set(0, -0.38, 0.03);
-            leftLeg.add(leftSole);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeo, darkPantsMat);
-            rightLeg.position.set(0.24, 0.4, 0);
-            const rightSole = new THREE.Mesh(leftSoleGeo, emeraldCircuitMat);
-            rightSole.position.set(0, -0.38, 0.03);
-            rightLeg.add(rightSole);
-            this.player.add(rightLeg);
-            this.limbs.rightLeg = rightLeg;
-
-            // Emerald Ambient Light
-            this.tatanLight = new THREE.PointLight(0x00ff66, 1.8, 5.0);
-            this.tatanLight.position.set(0, 0.8, -0.3);
-            this.playerMesh.add(this.tatanLight);
-
-        } else if (this.selectedDJ.id === "dj_fresar") {
-            // === 🔴 DJ FRESAR: INDUSTRIAL TECHNO CYBORG (Overdrive Visor, Tactical Vest with Strawberry Emblem) ===
-            const vestMat = new THREE.MeshStandardMaterial({
-                color: 0x111118,
-                roughness: 0.65,
-                metalness: 0.2
-            });
-            const crimsonLedMat = new THREE.MeshBasicMaterial({
-                color: 0xff0044
-            });
-            const strawberryMat = new THREE.MeshBasicMaterial({
-                color: 0xff0066
-            });
-            const cyberArmMat = new THREE.MeshStandardMaterial({
-                color: 0x475569,
-                roughness: 0.2,
-                metalness: 0.9
-            });
-            const skinMat = new THREE.MeshStandardMaterial({
-                color: 0xd69a7c,
-                roughness: 0.6
-            });
-            const combatPantsMat = new THREE.MeshStandardMaterial({
-                color: 0x090a0f,
-                roughness: 0.7
-            });
-
-            this.playerMesh = new THREE.Group();
-            this.playerMesh.position.y = 1.35;
-            this.player.add(this.playerMesh);
-
-            // 1. Tactical Combat Vest
-            const vestGeo = new THREE.BoxGeometry(0.92, 1.08, 0.52);
-            const vest = new THREE.Mesh(vestGeo, vestMat);
-            vest.position.y = 0.15;
-            this.playerMesh.add(vest);
-
-            // Neon Strawberry Insignia on chest
-            const strawberryGeo = new THREE.ConeGeometry(0.15, 0.22, 6);
-            const strawberry = new THREE.Mesh(strawberryGeo, strawberryMat);
-            strawberry.rotation.x = Math.PI;
-            strawberry.position.set(0.2, 0.35, 0.28);
-            this.playerMesh.add(strawberry);
-
-            // Strawberry green leaf top
-            const leafGeo = new THREE.BoxGeometry(0.12, 0.04, 0.06);
-            const leaf = new THREE.Mesh(leafGeo, new THREE.MeshBasicMaterial({ color: 0x00ff66 }));
-            leaf.position.set(0.2, 0.46, 0.28);
-            this.playerMesh.add(leaf);
-
-            // Twin Overclock Exhaust Vents on upper back
-            const ventGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 10);
-            const leftVent = new THREE.Mesh(ventGeo, crimsonLedMat);
-            leftVent.rotation.x = 0.3;
-            leftVent.position.set(-0.25, 0.45, -0.28);
-            this.playerMesh.add(leftVent);
-
-            const rightVent = new THREE.Mesh(ventGeo, crimsonLedMat);
-            rightVent.rotation.x = 0.3;
-            rightVent.position.set(0.25, 0.45, -0.28);
-            this.playerMesh.add(rightVent);
-
-            // 2. Head with Tactical Military Crop
-            const headGeo = new THREE.BoxGeometry(0.48, 0.52, 0.46);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.set(0, 0.92, 0.02);
-            this.playerMesh.add(head);
-
-            // 3. Wide Crimson Audio Spectrum Visor (Segmented LED Bars)
-            const visorFrameGeo = new THREE.BoxGeometry(0.52, 0.18, 0.2);
-            const visorFrame = new THREE.Mesh(visorFrameGeo, new THREE.MeshStandardMaterial({ color: 0x050508, metalness: 0.8 }));
-            visorFrame.position.set(0, 0.94, 0.24);
-            this.playerMesh.add(visorFrame);
-
-            // 5 Audio spectrum LED blocks inside the visor
-            for (let b = -2; b <= 2; b++) {
-                const barGeo = new THREE.BoxGeometry(0.06, 0.12, 0.04);
-                const bar = new THREE.Mesh(barGeo, crimsonLedMat);
-                bar.position.set(b * 0.09, 0.94, 0.34);
-                this.playerMesh.add(bar);
-            }
-
-            // 4. Left Arm: Biomechanical Prosthetic Arm
-            const cyberArmGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.72, 12);
-            const leftCyberArm = new THREE.Mesh(cyberArmGeo, cyberArmMat);
-            leftCyberArm.position.set(-0.6, 1.35, 0);
-
-            // Exposed crimson conduits around cyber arm
-            const conduitGeo = new THREE.TorusGeometry(0.13, 0.02, 6, 12);
-            for (let cIdx = 0; cIdx < 3; cIdx++) {
-                const conduit = new THREE.Mesh(conduitGeo, crimsonLedMat);
-                conduit.rotation.x = Math.PI / 2;
-                conduit.position.y = (cIdx - 1) * 0.2;
-                leftCyberArm.add(conduit);
-            }
-            this.player.add(leftCyberArm);
-            this.limbs.leftArm = leftCyberArm;
-
-            // 5. Right Arm: Tactical Sleeve & BPM Display
-            const armGeo = new THREE.BoxGeometry(0.24, 0.72, 0.24);
-            const rightArm = new THREE.Mesh(armGeo, vestMat);
-            rightArm.position.set(0.58, 1.35, 0);
-            const watchGeo = new THREE.BoxGeometry(0.14, 0.1, 0.26);
-            const watch = new THREE.Mesh(watchGeo, crimsonLedMat);
-            watch.position.set(0.08, -0.15, 0);
-            rightArm.add(watch);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-
-            // 6. Combat Legs with Steel-toe Boots
-            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
-            const leftLeg = new THREE.Mesh(legGeo, combatPantsMat);
-            leftLeg.position.set(-0.25, 0.4, 0);
-            const bootStripe = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.06, 0.32), crimsonLedMat);
-            bootStripe.position.set(0, -0.15, 0);
-            leftLeg.add(bootStripe);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeo, combatPantsMat);
-            rightLeg.position.set(0.25, 0.4, 0);
-            const rightBootStripe = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.06, 0.32), crimsonLedMat);
-            rightBootStripe.position.set(0, -0.15, 0);
-            rightLeg.add(rightBootStripe);
-            this.player.add(rightLeg);
-            this.limbs.rightLeg = rightLeg;
-
-            // Crimson Visor Light
-            this.fresarLight = new THREE.PointLight(0xff0044, 2.2, 5.5);
-            this.fresarLight.position.set(0, 0.95, 0.5);
-            this.playerMesh.add(this.fresarLight);
-
-        } else if (this.selectedDJ.isFemale) {
-            // === 🎀 FEMALE DJ CYBER-RUNNER (DJ STHEP & CAMILA LEURO) ===
-            const suitMat = new THREE.MeshStandardMaterial({
-                color: this.selectedDJ.color,
-                roughness: 0.25,
-                metalness: 0.4
-            });
-            const darkLatex = new THREE.MeshStandardMaterial({
-                color: 0x0c0c14,
-                roughness: 0.2,
-                metalness: 0.3
-            });
-            const skinMat = new THREE.MeshStandardMaterial({
-                color: 0xdfa485,
-                roughness: 0.6
-            });
-            const neonMat = new THREE.MeshBasicMaterial({
-                color: this.selectedDJ.neonColor
-            });
-
-            this.playerMesh = new THREE.Group();
-            this.playerMesh.position.y = 1.35;
-            this.player.add(this.playerMesh);
-
-            // Feminine Torso
-            const torsoGeo = new THREE.CylinderGeometry(0.38, 0.28, 0.65, 16);
-            const torso = new THREE.Mesh(torsoGeo, suitMat);
-            torso.position.y = 0.22;
-            this.playerMesh.add(torso);
-
-            const hipsGeo = new THREE.CylinderGeometry(0.28, 0.38, 0.48, 16);
-            const hips = new THREE.Mesh(hipsGeo, darkLatex);
-            hips.position.y = -0.25;
-            this.playerMesh.add(hips);
-
-            // Head
-            const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.position.set(0, 0.86, 0.02);
-            this.playerMesh.add(head);
-
-            // Cyber Visor in Neon Color
-            const visorGeo = new THREE.BoxGeometry(0.42, 0.12, 0.18);
-            const visor = new THREE.Mesh(visorGeo, neonMat);
-            visor.position.set(0, 0.88, 0.2);
-            this.playerMesh.add(visor);
-
-            // High Cyber Ponytail / Hair
-            const hairGeo = new THREE.SphereGeometry(0.26, 12, 12);
-            const hairTop = new THREE.Mesh(hairGeo, darkLatex);
-            hairTop.position.set(0, 0.9, -0.05);
-            this.playerMesh.add(hairTop);
-
-            const ponytailGeo = new THREE.CylinderGeometry(0.08, 0.04, 0.7, 8);
-            const ponytail = new THREE.Mesh(ponytailGeo, darkLatex);
-            ponytail.position.set(0, 0.6, -0.3);
-            ponytail.rotation.x = 0.35;
-            this.playerMesh.add(ponytail);
-
-            // Glowing Neon Headphones
-            const cupGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.09, 16);
-            const leftCup = new THREE.Mesh(cupGeo, neonMat);
-            leftCup.rotation.z = Math.PI / 2;
-            leftCup.position.set(-0.28, 0.86, 0);
-            this.playerMesh.add(leftCup);
-
-            const rightCup = new THREE.Mesh(cupGeo, neonMat);
-            rightCup.rotation.z = Math.PI / 2;
-            rightCup.position.set(0.28, 0.86, 0);
-            this.playerMesh.add(rightCup);
-
-            // Slim Limbs
-            const legGeo = new THREE.CylinderGeometry(0.13, 0.1, 0.82, 10);
-            const leftLeg = new THREE.Mesh(legGeo, darkLatex);
-            leftLeg.position.set(-0.2, 0.42, 0);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeo, darkLatex);
-            rightLeg.position.set(0.2, 0.42, 0);
-            this.player.add(rightLeg);
-            this.limbs.rightLeg = rightLeg;
-
-            const armGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.7, 10);
-            const leftArm = new THREE.Mesh(armGeo, suitMat);
-            leftArm.position.set(-0.52, 1.35, 0);
-            this.player.add(leftArm);
-            this.limbs.leftArm = leftArm;
-
-            const rightArm = new THREE.Mesh(armGeo, suitMat);
-            rightArm.position.set(0.52, 1.35, 0);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-
-        } else {
-            // === 🎧 STANDARD MALE / COLECTIVO DJ CYBER SUIT ===
-            const torsoGeo = new THREE.BoxGeometry(0.9, 1.1, 0.5);
-            const torsoMat = new THREE.MeshStandardMaterial({
-                color: this.selectedDJ.color,
-                roughness: 0.3,
-                metalness: 0.5
-            });
-            this.playerMesh = new THREE.Mesh(torsoGeo, torsoMat);
-            this.playerMesh.position.y = 1.35;
-            this.player.add(this.playerMesh);
-
-            // Head
-            const headGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.8 });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.set(0, 0.95, 0);
-            this.playerMesh.add(head);
-
-            // DJ Headphones
-            const cupGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16);
-            const cupMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
-            const leftCup = new THREE.Mesh(cupGeo, cupMat);
-            leftCup.rotation.z = Math.PI / 2;
-            leftCup.position.set(-0.32, 0, 0);
-            head.add(leftCup);
-
-            const rightCup = new THREE.Mesh(cupGeo, cupMat);
-            rightCup.rotation.z = Math.PI / 2;
-            rightCup.position.set(0.32, 0, 0);
-            head.add(rightCup);
-
-            // Visor
-            const visorGeo = new THREE.BoxGeometry(0.48, 0.18, 0.15);
-            const visorMat = new THREE.MeshBasicMaterial({ color: this.selectedDJ.neonColor || 0x00ffff });
-            const visor = new THREE.Mesh(visorGeo, visorMat);
-            visor.position.set(0, 0.05, 0.28);
-            head.add(visor);
-
-            // Limbs
-            const limbMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.5 });
-            const legGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
-            const leftLeg = new THREE.Mesh(legGeo, limbMat);
-            leftLeg.position.set(-0.25, 0.4, 0);
-            this.player.add(leftLeg);
-            this.limbs.leftLeg = leftLeg;
-
-            const rightLeg = new THREE.Mesh(legGeo, limbMat);
-            rightLeg.position.set(0.25, 0.4, 0);
-            this.player.add(rightLeg);
-            this.limbs.rightLeg = rightLeg;
-
-            const armGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
-            const leftArm = new THREE.Mesh(armGeo, limbMat);
-            leftArm.position.set(-0.62, 1.35, 0);
-            this.player.add(leftArm);
-            this.limbs.leftArm = leftArm;
-
-            const rightArm = new THREE.Mesh(armGeo, limbMat);
-            rightArm.position.set(0.62, 1.35, 0);
-            this.player.add(rightArm);
-            this.limbs.rightArm = rightArm;
-        }
+        this.tatanLight = null;
+        this.fresarLight = null;
+        this.flameLight = null;
+
+        // Modelo procedural del DJ seleccionado (ver DJ_LOOKS / buildDJAvatar).
+        buildDJAvatar(this, getDJLook(this.selectedDJ));
+        this.player.scale.setScalar(1.1);
 
         // Shield Bubble Visualizer
         const shieldGeo = new THREE.SphereGeometry(1.6, 24, 24);
@@ -2362,9 +2253,11 @@ class ZonaTRunnerGame {
         });
 
         // Camera Follow & Dynamic Speed FOV Warp (Image 2 Perspective)
-        this.camera.position.z = this.player.position.z - 5.8;
+        // Un poco mas atras y picada hacia abajo: el corredor queda completo por encima
+        // del banner de promo en vez de perder las piernas detras de el.
+        this.camera.position.z = this.player.position.z - 6.3;
         this.camera.position.x = this.player.position.x * 0.38;
-        this.camera.position.y = 3.6;
+        this.camera.position.y = 3.75;
 
         // Screen Shake
         if (this.shakeTime > 0) {
@@ -2373,7 +2266,7 @@ class ZonaTRunnerGame {
             this.camera.position.x += (Math.random() - 0.5) * amt;
             this.camera.position.y += (Math.random() - 0.5) * amt;
         }
-        this.camera.lookAt(this.player.position.x * 0.2, 2.8, this.player.position.z + 22);
+        this.camera.lookAt(this.player.position.x * 0.2, 1.5, this.player.position.z + 22);
         const targetFOV = 64 + (this.speed / this.maxSpeed) * 12;
         this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFOV, 3.5 * dt);
         this.camera.updateProjectionMatrix();
@@ -2665,5 +2558,5 @@ window.addEventListener("DOMContentLoaded", async () => {
             'Arranca el juego con <code>node server.js</code> desde la raiz del repo.</p></div></div>');
         return;
     }
-    new ZonaTRunnerGame();
+    window.ZONAT_GAME = new ZonaTRunnerGame();
 });

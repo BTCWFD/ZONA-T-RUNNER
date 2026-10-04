@@ -20,7 +20,7 @@
  * para forzar a los clientes a refrescar el cache viejo.
  */
 
-const CACHE_VERSION = 'zonat-shell-v1';
+const CACHE_VERSION = 'zonat-shell-v2';
 
 const SHELL_ASSETS = [
     './',
@@ -34,6 +34,12 @@ const SHELL_ASSETS = [
     './assets/avatars/dj_letal.jpg',
     './assets/avatars/dj_nunez.jpg',
     './assets/avatars/dj_tatan.jpg',
+    './assets/avatars/dj_noctua.jpg',
+    './assets/avatars/dj_camilo.jpg',
+    './assets/avatars/dj_valeria.jpg',
+    './assets/avatars/dj_bogota_allstars.jpg',
+    './assets/avatars/dj_sthep.jpg',
+    './assets/avatars/dj_camila_leuro.jpg',
     './assets/billboards/valla_baum.jpg',
     './assets/billboards/valla_octava.jpg',
     './assets/billboards/valla_andino.jpg',
