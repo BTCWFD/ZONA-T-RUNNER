@@ -95,7 +95,9 @@ self.addEventListener('fetch', (event) => {
     const isOwnCode = req.mode === 'navigate' || /\/(index\.html|game\.js)$/.test(url.pathname);
     if (url.pathname.endsWith(ROSTER_URL_SUFFIX) || isOwnCode) {
         event.respondWith(
-            fetch(req)
+            // cache: 'no-cache' obliga a revalidar con el servidor: GitHub Pages manda
+            // max-age=600 y sin esto un deploy tardaba hasta 10 minutos en verse.
+            fetch(req, { cache: 'no-cache' })
                 .then((res) => {
                     if (res.ok) {
                         const copy = res.clone();
